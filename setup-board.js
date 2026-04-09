@@ -1,4 +1,4 @@
-const GITHUB_TOKEN = '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';
+const GITHUB_TOKEN = 'your_token_here';
 const GITHUB_USERNAME = 'Domerbot';
 const PROJECT_NUMBER = 1;
 
