@@ -32,7 +32,7 @@
     /* ===== HEADER ===== */
     header {
       position: relative;
-      background: url('https://images.unsplash.com/photo-1562883676-8c7feb83f09b?w=1200') center 60% / cover no-repeat;
+      background: url('https://images.unsplash.com/photo-1506929562872-bb421503ef21?w=1200') center 45% / cover no-repeat;
       color: white;
       padding: 22px 20px 18px;
       text-align: center;
@@ -989,6 +989,300 @@
       transition: background 0.12s;
     }
     .joke-close-btn:active { background: #fef3c7; }
+
+    /* ===== BOTTOM BAR ICON BUTTONS ===== */
+    .bar-icon-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 52px;
+      flex-shrink: 0;
+      padding: 12px 0;
+      border-radius: 14px;
+      border: none;
+      background: white;
+      font-size: 1.3rem;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.09);
+      transition: transform 0.12s, box-shadow 0.12s;
+    }
+    .bar-icon-btn:active { transform: scale(0.94); box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+
+    /* ===== DELETE EVENTS BUTTON (below stats) ===== */
+    .delete-events-btn {
+      display: block;
+      width: 100%;
+      padding: 11px;
+      border-radius: 12px;
+      border: 1.5px solid #e2e8f0;
+      background-color: white;
+      color: #718096;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      text-align: center;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+    .delete-events-btn:hover  { border-color: #fca5a5; color: #ef4444; }
+    .delete-events-btn:active { background-color: #fff5f5; border-color: #fca5a5; color: #ef4444; }
+
+    /* ===== AI SUMMARY SHEET ===== */
+    .summary-sheet-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .summary-sheet { padding-bottom: 36px; }
+
+    /* ===== iOS INPUT FIX ===== */
+    /* Prevent iOS zoom on focus and fix cursor offset */
+    body { color-scheme: light; }
+    input.form-input, select.form-input, select.time-select, select.recurring-select {
+      -webkit-appearance: none;
+      appearance: none;
+      font-size: 16px; /* prevents iOS auto-zoom */
+    }
+    input.form-input[type="text"], input.form-input[type="date"] {
+      padding: 10px 12px; /* consistent iOS padding */
+    }
+
+    /* ===== DARK MODE BUTTON FIX ===== */
+    /* Explicit bg colours so dark mode doesn't invert them */
+    .del-bar-btn  { background-color: #ffffff; }
+    .cancel-btn   { background-color: #ffffff; }
+    .confirm-keep { background-color: #ffffff; }
+    .add-bar      { background: linear-gradient(to top, #f0f4f8 65%, rgba(240,244,248,0)); }
+
+    /* ===== TODAY BADGE IN EVENTS HEADER ===== */
+    .today-events-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .today-events-header .card-title { margin-bottom: 0; }
+    .today-badge { text-align: right; line-height: 1.25; }
+    .today-badge-day  { font-size: 0.67rem; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; }
+    .today-badge-date { font-size: 0.9rem; font-weight: 700; color: #4f46e5; }
+
+    /* ===== DATE DAY HINT ===== */
+    .date-day-hint {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #4f46e5;
+      margin-top: 4px;
+      min-height: 1.1em;
+    }
+
+    /* ===== CUSTOM TIME SELECT ===== */
+    select.time-select {
+      width: 100%;
+      padding: 10px 32px 10px 12px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 10px;
+      color: #1a202c;
+      outline: none;
+      font-family: inherit;
+      background-color: white;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23718096' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    select.time-select:focus { border-color: #4f46e5; }
+
+    /* ===== DELETE EVENT BUTTON (modal) ===== */
+    .btn-danger {
+      display: none;
+      width: 100%;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1.5px solid #fca5a5;
+      background-color: #fff5f5;
+      color: #ef4444;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+      font-family: inherit;
+      transition: background 0.15s;
+    }
+    .btn-danger:active { background-color: #fee2e2; }
+    .btn-danger.visible { display: block; }
+
+    /* ===== VIEW TOGGLE BAR ===== */
+    .view-toggle-bar {
+      display: flex;
+      background: white;
+      border-radius: 12px;
+      padding: 4px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+      gap: 4px;
+    }
+    .view-toggle-btn {
+      flex: 1;
+      padding: 8px 0;
+      border-radius: 9px;
+      border: none;
+      background: none;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #718096;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+    .view-toggle-btn.active { background: #4f46e5; color: white; }
+
+    /* ===== WEEK GRID ===== */
+    .week-grid-card { padding: 12px 10px; }
+    .week-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 3px;
+    }
+    .week-col { display: flex; flex-direction: column; align-items: stretch; min-height: 180px; }
+    .week-col-header { text-align: center; margin-bottom: 5px; }
+    .week-day-name {
+      font-size: 0.52rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.2px;
+      color: #a0aec0;
+      display: block;
+    }
+    .week-day-num {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #2d3748;
+      line-height: 1.3;
+    }
+    .week-col.is-today .week-day-num {
+      background: #4f46e5;
+      color: white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+      font-size: 0.7rem;
+    }
+    .week-events { display: flex; flex-direction: column; gap: 2px; }
+    .week-event-chip {
+      display: flex;
+      align-items: flex-start;
+      gap: 2px;
+      cursor: pointer;
+      border-radius: 3px;
+      padding: 1px 2px;
+      transition: background 0.1s;
+    }
+    .week-event-chip:active { background: #f0f4f8; }
+    .week-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 3px;
+    }
+    .week-event-name {
+      font-size: 0.56rem;
+      font-weight: 500;
+      color: #2d3748;
+      line-height: 1.3;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    /* ===== AI SUMMARY CARD ===== */
+    .summary-card {
+      background: linear-gradient(135deg, #ebf4ff 0%, #e8f0fe 100%);
+      border: 1px solid #bee3f8;
+    }
+
+    .summary-card .card-title {
+      color: #2b6cb0;
+    }
+
+    .summary-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .summary-header .card-title {
+      margin-bottom: 0;
+    }
+
+    .summary-refresh-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 11px;
+      border-radius: 20px;
+      border: 1.5px solid #90cdf4;
+      background: white;
+      color: #2b6cb0;
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .summary-refresh-btn:hover  { background: #ebf8ff; border-color: #63b3ed; }
+    .summary-refresh-btn:active { background: #bee3f8; }
+    .summary-refresh-btn:disabled { opacity: 0.5; cursor: default; }
+
+    .summary-refresh-icon {
+      display: inline-block;
+      transition: transform 0.6s ease;
+    }
+    .summary-refresh-btn.spinning .summary-refresh-icon {
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .summary-text {
+      font-size: 0.88rem;
+      color: #2d3748;
+      line-height: 1.65;
+    }
+
+    .summary-loading {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: #4a90d9;
+      font-size: 0.83rem;
+    }
+
+    .summary-dots span {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #63b3ed;
+      animation: dot-bounce 1.2s ease-in-out infinite;
+    }
+    .summary-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .summary-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes dot-bounce {
+      0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+      40%            { transform: translateY(-5px); opacity: 1; }
+    }
+
+    .summary-error {
+      font-size: 0.83rem;
+      color: #c53030;
+    }
   </style>
 </head>
 <body>
@@ -1041,36 +1335,46 @@
 
   <main>
 
-    <!-- Today -->
-    <div class="card">
-      <div class="card-title">Today</div>
-      <div class="today-date" id="today-date">—</div>
-      <div class="today-day" id="today-day">—</div>
-    </div>
-
-    <!-- Today's Events -->
-    <div class="card">
-      <div class="card-title">Today's Events</div>
+    <!-- Today's Events (date badge merged in) -->
+    <div class="card" id="today-card">
+      <div class="today-events-header">
+        <div class="card-title">Today's Events</div>
+        <div class="today-badge">
+          <div class="today-badge-day" id="today-day">—</div>
+          <div class="today-badge-date" id="today-date">—</div>
+        </div>
+      </div>
       <div class="event-list" id="list-today"></div>
     </div>
 
+    <!-- View toggle -->
+    <div class="view-toggle-bar">
+      <button class="view-toggle-btn active" id="btn-list-view" onclick="setView('list')">☰ List View</button>
+      <button class="view-toggle-btn" id="btn-week-view" onclick="setView('week')">📅 Week View</button>
+    </div>
+
+    <!-- Week grid (hidden by default) -->
+    <div class="card week-grid-card" id="week-grid-card" style="display:none">
+      <div class="week-grid" id="week-grid"></div>
+    </div>
+
     <!-- This Week's Events -->
-    <div class="card">
+    <div class="card" id="week-card">
       <div class="card-title">This Week's Events</div>
       <div class="event-list" id="list-week"></div>
     </div>
 
     <!-- Upcoming Events -->
-    <div class="card">
+    <div class="card" id="upcoming-card">
       <div class="card-title">Upcoming Events</div>
       <div class="event-list" id="list-upcoming"></div>
     </div>
 
     <!-- Edit hint -->
-    <p style="text-align:center;font-size:0.7rem;color:#a0aec0;margin-top:-6px;">✏ tap an event name to edit</p>
+    <p id="edit-hint" style="text-align:center;font-size:0.7rem;color:#a0aec0;margin-top:-6px;">✏ tap an event name to edit</p>
 
     <!-- Countdown -->
-    <div class="card">
+    <div class="card" id="countdown-card">
       <div class="card-title">Countdown</div>
       <div class="countdown-grid">
         <div class="countdown-box">
@@ -1094,10 +1398,13 @@
     </div>
 
     <!-- Stats -->
-    <div class="card">
+    <div class="card" id="stats-card">
       <div class="card-title">Time by Category</div>
       <div class="stats-list" id="stats-list"></div>
     </div>
+
+    <!-- Delete events -->
+    <button class="delete-events-btn" id="delete-events-btn" onclick="enterDeleteMode()">&#128465; Delete Event(s)</button>
 
   </main>
 
@@ -1109,12 +1416,9 @@
         <span class="plus-icon">+</span>
         Add Event
       </button>
-      <button class="del-bar-btn" onclick="enterDeleteMode()">
-        &#128465; Delete
-      </button>
+      <button class="bar-icon-btn" onclick="openSummarySheet()" title="AI Summary">✨</button>
+      <button class="bar-icon-btn" onclick="openJoke()" title="Jokes">😂</button>
     </div>
-    <!-- Joke button (hidden in delete mode) -->
-    <button class="joke-bar-btn" id="joke-bar-btn" onclick="openJoke()">Joke Button!!</button>
 
     <!-- Delete mode state -->
     <div class="del-action-bar" id="delete-bar">
@@ -1122,6 +1426,26 @@
       <button class="confirm-del-btn" id="confirm-del-btn" onclick="showConfirm()">
         Delete <span id="del-count">0</span> event<span id="del-plural"></span>
       </button>
+    </div>
+  </div>
+
+  <!-- AI Summary sheet -->
+  <div class="modal-overlay" id="summary-overlay" onclick="handleSummaryOverlayClick(event)">
+    <div class="modal-sheet summary-sheet">
+      <div class="modal-handle"></div>
+      <div class="summary-sheet-header">
+        <div class="modal-title" style="margin-bottom:0">✨ This Week's Summary</div>
+        <button class="summary-refresh-btn" id="summary-refresh-btn" onclick="fetchSummary()">
+          <span class="summary-refresh-icon">&#8635;</span> Refresh
+        </button>
+      </div>
+      <div id="summary-body" style="margin-top:14px">
+        <div class="summary-loading">
+          <div class="summary-dots"><span></span><span></span><span></span></div>
+          Asking AI…
+        </div>
+      </div>
+      <button class="btn-primary" style="margin-top:16px" onclick="closeSummarySheet()">Dismiss</button>
     </div>
   </div>
 
@@ -1172,17 +1496,18 @@
 
       <div class="form-group">
         <label class="form-label">Date</label>
-        <input class="form-input" id="f-date" type="date" />
+        <input class="form-input" id="f-date" type="date" oninput="updateDateDayLabel()" onchange="updateDateDayLabel()" />
+        <div class="date-day-hint" id="f-date-day"></div>
       </div>
 
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Start Time</label>
-          <input class="form-input" id="f-start" type="time" />
+          <select class="time-select" id="f-start" onchange="autoSetEndTime()"></select>
         </div>
         <div class="form-group">
           <label class="form-label">End Time</label>
-          <input class="form-input" id="f-end" type="time" />
+          <select class="time-select" id="f-end" onchange="endTimeManuallySet=true"></select>
         </div>
       </div>
 
@@ -1247,13 +1572,14 @@
       </div>
 
       <button class="btn-primary" id="modal-submit-btn" onclick="submitEvent()">Add Event</button>
+      <button class="btn-danger" id="modal-delete-btn" onclick="deleteFromModal()">&#128465; Delete Event</button>
     </div>
   </div>
 
   <script>
     // ─── CONFIG ──────────────────────────────────────────────────────────────
 
-    const API_BASE = 'http://127.0.0.1:8000';
+    const API_BASE = 'http://10.0.0.13:8000';
 
     const PEOPLE = ['Mark', 'Julie', 'Ryan', 'Noah'];
     const INITIALS = { Mark:'M', Julie:'J', Ryan:'R', Noah:'N' };
@@ -1336,6 +1662,7 @@
     let recurringEnabled = false;
     let isLoading = false;
     let apiError = false;
+    let endTimeManuallySet = false;
 
     // ─── QUICK SELECT NAMES ──────────────────────────────────────────────────
     const QS_DEFAULT_NAMES = [
@@ -1407,10 +1734,11 @@
       const wkEnd  = weekEndStr();
       const upEnd  = upcomingEndStr();
 
-      renderList('list-today',    events.filter(e => e.date === today),               false);
+      renderList('list-today',    events.filter(e => e.date === today),                  false);
       renderList('list-week',     events.filter(e => e.date > today && e.date <= wkEnd), true);
       renderList('list-upcoming', events.filter(e => e.date > wkEnd  && e.date <= upEnd), true);
       renderStats();
+      if (currentView === 'week') renderWeekView();
     }
 
     function renderList(id, evts, showDate) {
@@ -1437,6 +1765,7 @@
           ? `onclick="event.stopPropagation();toggleEventPerson(${e.id},'${p}')"` : '';
         return `<div class="avatar${active?'':' inactive'}${!deleteMode?' tappable':''}"
                      style="background:${active?PERSON_COLORS[p]:''}"
+                     data-event-id="${e.id}" data-person="${p}"
                      ${avatarClick} title="${p}">${INITIALS[p]}</div>`;
       }).join('');
 
@@ -1507,7 +1836,7 @@
     function renderToday() {
       const now = new Date();
       document.getElementById('today-date').textContent =
-        now.toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' });
+        now.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
       document.getElementById('today-day').textContent =
         now.toLocaleDateString('en-GB', { weekday:'long' });
     }
@@ -1577,18 +1906,67 @@
       return evs;
     }
 
+    // ─── TIME SELECT HELPERS ─────────────────────────────────────────────────
+
+    function buildTimeOptions(selectId, selectedVal) {
+      const sel = document.getElementById(selectId);
+      sel.innerHTML = '';
+      const slots = [];
+      for (let h = 0; h < 24; h++) {
+        for (const m of [0, 15, 30, 45]) {
+          slots.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`);
+        }
+      }
+      // If the existing value doesn't fall on a 15-min boundary, add it
+      if (selectedVal && !slots.includes(selectedVal)) slots.push(selectedVal);
+      slots.sort();
+      slots.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t;
+        opt.textContent = fmtTime(t);
+        if (t === selectedVal) opt.selected = true;
+        sel.appendChild(opt);
+      });
+    }
+
+    function autoSetEndTime() {
+      if (endTimeManuallySet) return;
+      const startVal = document.getElementById('f-start').value;
+      if (!startVal) return;
+      const [h, m] = startVal.split(':').map(Number);
+      const endH = (h + 1) % 24;
+      const endVal = `${String(endH).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+      buildTimeOptions('f-end', endVal);
+    }
+
+    // ─── DATE DAY LABEL ──────────────────────────────────────────────────────
+
+    function updateDateDayLabel() {
+      const val = document.getElementById('f-date').value;
+      const el  = document.getElementById('f-date-day');
+      if (!val) { el.textContent = ''; return; }
+      const [y,m,d] = val.split('-').map(Number);
+      const day = new Date(y, m-1, d).toLocaleDateString('en-GB', { weekday:'long' });
+      el.textContent = day;
+    }
+
     // ─── MODAL ────────────────────────────────────────────────────────────────
 
     function openModal(id = null) {
       editingId = id;
       const ev = id != null ? events.find(e => e.id === id) : null;
 
-      document.getElementById('f-name').value  = ev ? ev.name       : '';
-      document.getElementById('f-date').value  = ev ? ev.date       : todayStr();
-      document.getElementById('f-start').value = ev ? ev.startTime  : '';
-      document.getElementById('f-end').value   = ev ? ev.endTime    : '';
-      document.getElementById('f-cat').value   = ev ? ev.category   : 'family';
+      document.getElementById('f-name').value = ev ? ev.name     : '';
+      document.getElementById('f-date').value = ev ? ev.date     : todayStr();
+      document.getElementById('f-cat').value  = ev ? ev.category : 'family';
       updateCatDot();
+      updateDateDayLabel();
+
+      endTimeManuallySet = false;
+      const startVal = ev ? ev.startTime : '08:00';
+      const endVal   = ev ? ev.endTime   : '09:00';
+      buildTimeOptions('f-start', startVal);
+      buildTimeOptions('f-end',   endVal);
 
       formPeople   = ev ? [...(ev.people || [])] : [];
       formReminder = ev ? (ev.reminder || 'none') : 'none';
@@ -1596,19 +1974,32 @@
       renderFormReminders();
 
       const isEdit = ev != null;
-      document.getElementById('modal-title').textContent      = isEdit ? 'Edit Event'    : 'Add Event';
-      document.getElementById('modal-submit-btn').textContent = isEdit ? 'Save Changes'  : 'Add Event';
+      document.getElementById('modal-title').textContent      = isEdit ? 'Edit Event'   : 'Add Event';
+      document.getElementById('modal-submit-btn').textContent = isEdit ? 'Save Changes' : 'Add Event';
+      document.getElementById('modal-delete-btn').classList.toggle('visible', isEdit);
 
-      // Reset quick select
       document.getElementById('qs-suggestions').innerHTML = '';
 
-      // Recurring: hide when editing, reset when adding
       recurringEnabled = false;
       document.getElementById('recurring-section').style.display = isEdit ? 'none' : '';
       document.getElementById('recurring-toggle').classList.remove('on');
       document.getElementById('recurring-body').style.display = 'none';
 
       document.getElementById('modal-overlay').classList.add('open');
+    }
+
+    // ─── DELETE FROM MODAL ───────────────────────────────────────────────────
+
+    async function deleteFromModal() {
+      if (editingId == null) return;
+      const id = editingId;
+      closeModal();
+      try {
+        await fetch(`${API_BASE}/events/${id}`, { method: 'DELETE' });
+      } catch (e) {
+        showBanner('Could not delete — is the server running?');
+      }
+      await loadEvents();
     }
 
     function closeModal() {
@@ -1754,7 +2145,6 @@
       activeCategoryPicker = null;
       document.getElementById('normal-bar').classList.add('hidden');
       document.getElementById('delete-bar').classList.add('visible');
-      document.getElementById('joke-bar-btn').style.display = 'none';
       updateDeleteBar();
       renderAll();
     }
@@ -1764,7 +2154,6 @@
       selectedIds.clear();
       document.getElementById('normal-bar').classList.remove('hidden');
       document.getElementById('delete-bar').classList.remove('visible');
-      document.getElementById('joke-bar-btn').style.display = '';
       renderAll();
     }
 
@@ -1853,9 +2242,23 @@
       if (deleteMode) return;
       const ev = events.find(e => e.id === eventId);
       if (!ev) return;
-      const people = (ev.people || []).includes(personName)
+
+      const wasActive = (ev.people || []).includes(personName);
+      const people    = wasActive
         ? ev.people.filter(p => p !== personName)
         : [...(ev.people || []), personName];
+
+      // Optimistic patch — update local state and just flip the one avatar
+      ev.people = people;
+      const avatarEl = document.querySelector(
+        `.avatar[data-event-id="${eventId}"][data-person="${personName}"]`
+      );
+      if (avatarEl) {
+        const nowActive = people.includes(personName);
+        avatarEl.classList.toggle('inactive', !nowActive);
+        avatarEl.style.background = nowActive ? PERSON_COLORS[personName] : '';
+      }
+
       try {
         await fetch(`${API_BASE}/events/${eventId}`, {
           method: 'PUT',
@@ -1863,9 +2266,11 @@
           body: JSON.stringify({ ...ev, people }),
         });
       } catch (e) {
+        // Revert optimistic update on failure
+        ev.people = wasActive ? [...people, personName] : people.filter(p => p !== personName);
         showBanner('Could not update — is the server running?');
+        renderAll();
       }
-      await loadEvents();
     }
 
     // ─── JOKES ───────────────────────────────────────────────────────────────
@@ -2015,6 +2420,112 @@
       document.getElementById('joke-punchline').textContent = joke.a;
       document.getElementById('joke-counter').textContent =
         `Joke ${jokeQueueIdx + 1} of ${JOKES.length}`;
+    }
+
+    // ─── WEEK VIEW ───────────────────────────────────────────────────────────
+
+    let currentView = 'list';
+
+    const LIST_CARD_IDS = ['today-card','week-card','upcoming-card','edit-hint','countdown-card','stats-card','delete-events-btn'];
+
+    function setView(view) {
+      currentView = view;
+      const isWeek = view === 'week';
+      document.getElementById('btn-list-view').classList.toggle('active', !isWeek);
+      document.getElementById('btn-week-view').classList.toggle('active',  isWeek);
+      document.getElementById('week-grid-card').style.display = isWeek ? '' : 'none';
+      LIST_CARD_IDS.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = isWeek ? 'none' : '';
+      });
+      if (isWeek) renderWeekView();
+    }
+
+    function renderWeekView() {
+      const grid  = document.getElementById('week-grid');
+      const today = new Date(); today.setHours(0,0,0,0);
+      const now = new Date();
+      const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+
+      // Find Monday of current week
+      const dow = today.getDay(); // 0=Sun
+      const monday = new Date(today);
+      monday.setDate(today.getDate() - (dow === 0 ? 6 : dow - 1));
+
+      const localStr = d =>
+        `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+
+      const cols = [];
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(monday);
+        d.setDate(monday.getDate() + i);
+        const ds = localStr(d);
+        const dayEvents = [...events]
+          .filter(e => e.date === ds)
+          .sort((a,b) => a.startTime.localeCompare(b.startTime));
+
+        const isToday = ds === todayStr;
+        const dayName = d.toLocaleDateString('en-GB', { weekday:'short' });
+        const dayNum  = d.getDate();
+
+        const chips = dayEvents.map(e => {
+          const cat = CATS[e.category] || CATS.general;
+          return `<div class="week-event-chip" onclick="openModal(${e.id})">
+            <div class="week-dot" style="background:${cat.color}"></div>
+            <div class="week-event-name">${esc(e.name)}</div>
+          </div>`;
+        }).join('');
+
+        cols.push(`
+          <div class="week-col${isToday?' is-today':''}">
+            <div class="week-col-header">
+              <span class="week-day-name">${dayName}</span>
+              <div class="week-day-num">${dayNum}</div>
+            </div>
+            <div class="week-events">${chips}</div>
+          </div>`);
+      }
+      grid.innerHTML = cols.join('');
+    }
+
+    // ─── AI SUMMARY SHEET ────────────────────────────────────────────────────
+
+    function openSummarySheet() {
+      document.getElementById('summary-overlay').classList.add('open');
+      fetchSummary();
+    }
+
+    function closeSummarySheet() {
+      document.getElementById('summary-overlay').classList.remove('open');
+    }
+
+    function handleSummaryOverlayClick(e) {
+      if (e.target.id === 'summary-overlay') closeSummarySheet();
+    }
+
+    async function fetchSummary() {
+      const body = document.getElementById('summary-body');
+      const btn  = document.getElementById('summary-refresh-btn');
+
+      body.innerHTML = `
+        <div class="summary-loading">
+          <div class="summary-dots"><span></span><span></span><span></span></div>
+          Asking AI…
+        </div>`;
+      btn.disabled = true;
+      btn.classList.add('spinning');
+
+      try {
+        const res = await fetch(`${API_BASE}/summary`);
+        if (!res.ok) throw new Error('Server error');
+        const { summary } = await res.json();
+        body.innerHTML = `<div class="summary-text">${esc(summary)}</div>`;
+      } catch (e) {
+        body.innerHTML = `<div class="summary-error">Could not load summary — is the server running?</div>`;
+      } finally {
+        btn.disabled = false;
+        btn.classList.remove('spinning');
+      }
     }
 
     // ─── INIT ────────────────────────────────────────────────────────────────

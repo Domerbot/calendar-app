@@ -1,10 +1,16 @@
 import json
+import os
 import sqlite3
 from contextlib import asynccontextmanager
+from datetime import date, timedelta
 
+import httpx
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+
+load_dotenv()
 
 DB_PATH = "calendar.db"
 
@@ -133,3 +139,59 @@ def delete_event(event_id: int):
     conn.close()
     if result.rowcount == 0:
         raise HTTPException(status_code=404, detail="Event not found")
+
+
+@app.get("/summary")
+async def get_summary():
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        raise HTTPException(status_code=500, detail="OPENAI_API_KEY not set")
+
+    today = date.today()
+    window_end = today + timedelta(days=14)
+
+    conn = get_db()
+    rows = conn.execute(
+        "SELECT * FROM events WHERE date >= ? AND date <= ? ORDER BY date, startTime",
+        (today.isoformat(), window_end.isoformat()),
+    ).fetchall()
+    conn.close()
+
+    if not rows:
+        return {"summary": "Nothing in the calendar for the next two weeks — a great chance to relax before the big move to Spain!"}
+
+    events_text = "\n".join(
+        f"- {r['date']} {r['startTime']}–{r['endTime']}: {r['name']} "
+        f"(category: {r['category']}, people: {r['people']}, reminder: {r['reminder']})"
+        for r in rows
+    )
+
+    prompt = (
+        "You are a warm, friendly family assistant for the Humariri family: "
+        "Mark, Julie, Ryan, and Noah. They are preparing to move from the UK to Spain in July 2026 "
+        "and are excited about the adventure ahead.\n\n"
+        "Here are their upcoming events for the next 14 days:\n"
+        f"{events_text}\n\n"
+        "Write a short, friendly 3–4 sentence summary of the week ahead. "
+        "Highlight the key events, mention who is involved by name, and end with one warm or fun observation "
+        "about the family or their upcoming move to Spain. Keep it upbeat and personal."
+    )
+
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            "https://api.openai.com/v1/chat/completions",
+            headers={"Authorization": f"Bearer {api_key}"},
+            json={
+                "model": "gpt-4o-mini",
+                "messages": [{"role": "user", "content": prompt}],
+                "max_tokens": 200,
+                "temperature": 0.7,
+            },
+            timeout=20,
+        )
+
+    if response.status_code != 200:
+        raise HTTPException(status_code=502, detail="OpenAI request failed")
+
+    summary = response.json()["choices"][0]["message"]["content"].strip()
+    return {"summary": summary}
