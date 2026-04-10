@@ -1120,6 +1120,10 @@
       padding: 4px;
       box-shadow: 0 1px 6px rgba(0,0,0,0.08);
       gap: 4px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      margin-bottom: 12px;
     }
     .view-toggle-btn {
       flex: 1;
@@ -1335,6 +1339,12 @@
 
   <main>
 
+    <!-- View toggle -->
+    <div class="view-toggle-bar">
+      <button class="view-toggle-btn active" id="btn-list-view" onclick="setView('list')">☰ List View</button>
+      <button class="view-toggle-btn" id="btn-week-view" onclick="setView('week')">📅 Week View</button>
+    </div>
+
     <!-- Today's Events (date badge merged in) -->
     <div class="card" id="today-card">
       <div class="today-events-header">
@@ -1345,12 +1355,6 @@
         </div>
       </div>
       <div class="event-list" id="list-today"></div>
-    </div>
-
-    <!-- View toggle -->
-    <div class="view-toggle-bar">
-      <button class="view-toggle-btn active" id="btn-list-view" onclick="setView('list')">☰ List View</button>
-      <button class="view-toggle-btn" id="btn-week-view" onclick="setView('week')">📅 Week View</button>
     </div>
 
     <!-- Week grid (hidden by default) -->
@@ -2123,8 +2127,14 @@
       else if (ev.reminder === '1hour') remTime = new Date(evTime - 3600000);
       else if (ev.reminder === '30min') remTime = new Date(evTime - 1800000);
 
+      // Unknown reminder value — remTime would be undefined, producing NaN delay
+      if (!remTime) return;
+
       const delay = remTime - Date.now();
+      // Ignore past reminders silently
       if (delay <= 0) return;
+      // setTimeout overflows and fires immediately for delays > ~24.8 days (2^31-1 ms)
+      if (delay > 2147483647) return;
 
       const label = REMINDER_LABELS[ev.reminder];
       setTimeout(() => {
