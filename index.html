@@ -5,72 +5,80 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Humariri Calendar</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    /* ===== RESET ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    /* ===== BASE ===== */
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #f0f4f8;
+      background-color: #f0f4f8;
       color: #1a202c;
       min-height: 100vh;
     }
 
+    /* Subtle Spanish flag hint — very faint red/gold stripes on the background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(198,11,30,0.032)   0%,
+        rgba(198,11,30,0.032)  25%,
+        rgba(255,196,0,0.038)  25%,
+        rgba(255,196,0,0.038)  75%,
+        rgba(198,11,30,0.032)  75%,
+        rgba(198,11,30,0.032) 100%
+      );
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ===== HEADER ===== */
     header {
       position: relative;
-      background: url('https://images.unsplash.com/photo-1562883676-8c7feb83f09b?w=1200') center center / cover no-repeat;
+      background: url('https://images.unsplash.com/photo-1562883676-8c7feb83f09b?w=1200') center 60% / cover no-repeat;
       color: white;
-      padding: 24px 20px 20px;
+      padding: 22px 20px 18px;
       text-align: center;
-      overflow: hidden;
-    }
-
-    header::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(79,70,229,0.65), rgba(124,58,237,0.65));
-    }
-
-    header h1,
-    header p {
-      position: relative;
-      z-index: 1;
-      text-shadow: 0 1px 6px rgba(0,0,0,0.4);
     }
 
     header h1 {
-      font-size: 1.75rem;
+      font-size: 1.7rem;
       font-weight: 700;
       letter-spacing: -0.5px;
+      text-shadow: 0 1px 8px rgba(0,0,0,0.55), 0 2px 20px rgba(0,0,0,0.3);
     }
 
     header p {
-      font-size: 0.85rem;
-      opacity: 0.8;
-      margin-top: 4px;
+      font-size: 0.82rem;
+      margin-top: 3px;
+      text-shadow: 0 1px 6px rgba(0,0,0,0.55);
+      opacity: 0.95;
     }
 
+    /* ===== LAYOUT ===== */
     main {
+      position: relative;
+      z-index: 1;
       max-width: 480px;
       margin: 0 auto;
-      padding: 20px 16px;
+      padding: 16px 14px 100px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 14px;
     }
 
+    /* ===== CARD ===== */
     .card {
       background: white;
       border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      padding: 16px 18px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.08);
     }
 
     .card-title {
-      font-size: 0.7rem;
+      font-size: 0.67rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 1px;
@@ -78,89 +86,146 @@
       margin-bottom: 12px;
     }
 
-    /* Today section */
+    /* ===== TODAY CARD ===== */
     .today-date {
-      font-size: 2rem;
+      font-size: 1.9rem;
       font-weight: 700;
       color: #4f46e5;
       line-height: 1.1;
     }
 
     .today-day {
-      font-size: 1rem;
+      font-size: 0.95rem;
       color: #718096;
-      margin-top: 4px;
+      margin-top: 3px;
     }
 
-    /* Events section */
-    .event-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
+    /* ===== EVENT LIST ===== */
+    .event-list { display: flex; flex-direction: column; }
 
     .event-item {
+      padding: 11px 0;
+      border-bottom: 1px solid #f0f4f8;
+    }
+    .event-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .event-item:first-child { padding-top: 0; }
+
+    .event-top {
       display: flex;
       align-items: flex-start;
-      gap: 14px;
+      gap: 10px;
     }
 
     .event-dot {
-      width: 10px;
-      height: 10px;
+      width: 9px;
+      height: 9px;
       border-radius: 50%;
       margin-top: 5px;
       flex-shrink: 0;
     }
 
-    .event-info {
-      flex: 1;
-    }
+    .event-body { flex: 1; min-width: 0; }
 
     .event-name {
-      font-size: 0.95rem;
+      font-size: 0.93rem;
       font-weight: 600;
       color: #1a202c;
     }
 
-    .event-date {
-      font-size: 0.8rem;
+    .event-time {
+      font-size: 0.76rem;
+      color: #718096;
+      margin-top: 1px;
+    }
+
+    .event-date-label {
+      font-size: 0.73rem;
       color: #a0aec0;
-      margin-top: 2px;
+      margin-top: 1px;
     }
 
     .event-tag {
-      font-size: 0.7rem;
+      font-size: 0.67rem;
       font-weight: 600;
       padding: 2px 8px;
       border-radius: 20px;
       white-space: nowrap;
+      display: block;
+      text-align: center;
     }
 
-    /* Countdown section */
+    /* Right column: category tag + 2×2 people grid */
+    .event-right {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .people-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3px;
+    }
+
+    .event-reminder {
+      font-size: 0.67rem;
+      color: #9f7aea;
+      margin-top: 4px;
+    }
+
+    /* ===== PEOPLE AVATARS ===== */
+
+    .avatar {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      font-size: 0.62rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .avatar.inactive {
+      background: #e2e8f0 !important;
+      color: #cbd5e0;
+    }
+
+    /* ===== EMPTY STATE ===== */
+    .empty-state {
+      color: #a0aec0;
+      font-size: 0.83rem;
+      text-align: center;
+      padding: 10px 0;
+    }
+
+    /* ===== COUNTDOWN ===== */
     .countdown-grid {
       display: flex;
-      gap: 12px;
-      justify-content: center;
+      gap: 8px;
     }
 
     .countdown-box {
       flex: 1;
       background: #f7f3ff;
       border-radius: 12px;
-      padding: 14px 8px;
+      padding: 12px 6px;
       text-align: center;
     }
 
     .countdown-number {
-      font-size: 2rem;
+      font-size: 1.75rem;
       font-weight: 700;
       color: #7c3aed;
       line-height: 1;
     }
 
     .countdown-label {
-      font-size: 0.65rem;
+      font-size: 0.6rem;
       text-transform: uppercase;
       letter-spacing: 0.5px;
       color: #9f7aea;
@@ -169,23 +234,254 @@
 
     .countdown-event-name {
       text-align: center;
-      font-size: 0.85rem;
+      font-size: 0.83rem;
       color: #718096;
       margin-top: 12px;
     }
 
-    .divider {
-      border: none;
-      border-top: 1px solid #e2e8f0;
-      margin: 4px 0;
+    /* ===== STATS ===== */
+    .stats-list {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
     }
+
+    .stat-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .stat-label {
+      font-size: 0.73rem;
+      font-weight: 600;
+      color: #4a5568;
+      width: 58px;
+      flex-shrink: 0;
+    }
+
+    .stat-bar-wrap {
+      flex: 1;
+      height: 9px;
+      background: #f0f4f8;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .stat-bar {
+      height: 100%;
+      border-radius: 6px;
+      min-width: 4px;
+      transition: width 0.7s cubic-bezier(.22,.68,0,1.2);
+    }
+
+    .stat-count {
+      font-size: 0.7rem;
+      color: #a0aec0;
+      width: 48px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    /* ===== FAB ===== */
+    .fab {
+      position: fixed;
+      bottom: 24px;
+      right: 20px;
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white;
+      font-size: 1.7rem;
+      line-height: 1;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(79,70,229,0.38);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      transition: transform 0.15s;
+    }
+    .fab:active { transform: scale(0.93); }
+
+    /* ===== MODAL ===== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.42);
+      z-index: 200;
+      display: flex;
+      align-items: flex-end;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.22s;
+    }
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal-sheet {
+      background: white;
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      border-radius: 20px 20px 0 0;
+      padding: 16px 18px 44px;
+      max-height: 92vh;
+      overflow-y: auto;
+      transform: translateY(100%);
+      transition: transform 0.28s cubic-bezier(.32,.72,0,1);
+    }
+    .modal-overlay.open .modal-sheet { transform: translateY(0); }
+
+    .modal-handle {
+      width: 36px;
+      height: 4px;
+      background: #e2e8f0;
+      border-radius: 2px;
+      margin: 0 auto 14px;
+    }
+
+    .modal-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #1a202c;
+      margin-bottom: 16px;
+    }
+
+    /* ===== FORM ===== */
+    .form-group { margin-bottom: 13px; }
+
+    .form-label {
+      display: block;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #718096;
+      margin-bottom: 5px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 0.93rem;
+      color: #1a202c;
+      outline: none;
+      transition: border-color 0.15s;
+      font-family: inherit;
+      background: white;
+    }
+    .form-input:focus { border-color: #4f46e5; }
+
+    .form-row { display: flex; gap: 10px; }
+    .form-row .form-group { flex: 1; }
+
+    .cat-select-wrap { position: relative; }
+
+    .cat-dot {
+      position: absolute;
+      left: 11px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    select.form-input { padding-left: 28px; }
+
+    /* People selector in form */
+    .people-selector { display: flex; gap: 8px; }
+
+    .person-toggle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2.5px solid transparent;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: white;
+      cursor: pointer;
+      opacity: 0.3;
+      transition: opacity 0.15s, border-color 0.15s;
+    }
+    .person-toggle.on {
+      opacity: 1;
+      border-color: rgba(0,0,0,0.12);
+    }
+
+    /* Reminder options */
+    .reminder-opts { display: flex; gap: 7px; flex-wrap: wrap; }
+
+    .reminder-btn {
+      padding: 7px 11px;
+      border-radius: 8px;
+      border: 1.5px solid #e2e8f0;
+      background: white;
+      font-size: 0.75rem;
+      color: #4a5568;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+    .reminder-btn.on {
+      border-color: #7c3aed;
+      background: #f3f0ff;
+      color: #7c3aed;
+      font-weight: 600;
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 13px;
+      border-radius: 12px;
+      border: none;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white;
+      font-size: 0.97rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 6px;
+      font-family: inherit;
+      transition: opacity 0.15s;
+    }
+    .btn-primary:active { opacity: 0.88; }
+
+    /* ===== IN-APP NOTIFICATION BANNER ===== */
+    .notif-banner {
+      position: fixed;
+      top: -90px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1a202c;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-size: 0.83rem;
+      font-weight: 500;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.22);
+      z-index: 999;
+      max-width: 340px;
+      width: 90%;
+      text-align: center;
+      transition: top 0.3s ease;
+      pointer-events: none;
+    }
+    .notif-banner.show { top: 14px; }
   </style>
 </head>
 <body>
 
   <header>
     <h1>Humariri Calendar</h1>
-    <p>Family events & countdowns</p>
+    <p>Family events &amp; countdowns</p>
   </header>
 
   <main>
@@ -197,54 +493,22 @@
       <div class="today-day" id="today-day">—</div>
     </div>
 
+    <!-- Today's Events -->
+    <div class="card">
+      <div class="card-title">Today's Events</div>
+      <div class="event-list" id="list-today"></div>
+    </div>
+
+    <!-- This Week's Events -->
+    <div class="card">
+      <div class="card-title">This Week's Events</div>
+      <div class="event-list" id="list-week"></div>
+    </div>
+
     <!-- Upcoming Events -->
     <div class="card">
       <div class="card-title">Upcoming Events</div>
-      <div class="event-list">
-
-        <div class="event-item">
-          <div class="event-dot" style="background:#f6ad55;"></div>
-          <div class="event-info">
-            <div class="event-name">School Sports Day</div>
-            <div class="event-date">Saturday, 19 Apr 2026</div>
-          </div>
-          <span class="event-tag" style="background:#fffbeb;color:#d97706;">School</span>
-        </div>
-
-        <hr class="divider" />
-
-        <div class="event-item">
-          <div class="event-dot" style="background:#68d391;"></div>
-          <div class="event-info">
-            <div class="event-name">Family Picnic</div>
-            <div class="event-date">Sunday, 27 Apr 2026</div>
-          </div>
-          <span class="event-tag" style="background:#f0fff4;color:#276749;">Family</span>
-        </div>
-
-        <hr class="divider" />
-
-        <div class="event-item">
-          <div class="event-dot" style="background:#76e4f7;"></div>
-          <div class="event-info">
-            <div class="event-name">Doctor Appointment</div>
-            <div class="event-date">Wednesday, 7 May 2026</div>
-          </div>
-          <span class="event-tag" style="background:#e6fffa;color:#2c7a7b;">Health</span>
-        </div>
-
-        <hr class="divider" />
-
-        <div class="event-item">
-          <div class="event-dot" style="background:#f687b3;"></div>
-          <div class="event-info">
-            <div class="event-name">Birthday Party</div>
-            <div class="event-date">Saturday, 24 May 2026</div>
-          </div>
-          <span class="event-tag" style="background:#fff5f7;color:#97266d;">Birthday</span>
-        </div>
-
-      </div>
+      <div class="event-list" id="list-upcoming"></div>
     </div>
 
     <!-- Countdown -->
@@ -261,43 +525,417 @@
         </div>
         <div class="countdown-box">
           <div class="countdown-number" id="cd-minutes">—</div>
-          <div class="countdown-label">Minutes</div>
+          <div class="countdown-label">Mins</div>
+        </div>
+        <div class="countdown-box">
+          <div class="countdown-number" id="cd-seconds">—</div>
+          <div class="countdown-label">Secs</div>
         </div>
       </div>
       <div class="countdown-event-name">until <strong>Departure to Spain</strong> — 1 Jul 2026</div>
     </div>
 
+    <!-- Stats -->
+    <div class="card">
+      <div class="card-title">Time by Category</div>
+      <div class="stats-list" id="stats-list"></div>
+    </div>
+
   </main>
 
+  <!-- FAB -->
+  <button class="fab" onclick="openModal()" title="Add event">+</button>
+
+  <!-- In-app notification banner -->
+  <div class="notif-banner" id="notif-banner"></div>
+
+  <!-- Add Event Modal -->
+  <div class="modal-overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title">Add Event</div>
+
+      <div class="form-group">
+        <label class="form-label">Event Name</label>
+        <input class="form-input" id="f-name" type="text" placeholder="e.g. School pickup" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Date</label>
+        <input class="form-input" id="f-date" type="date" />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Start Time</label>
+          <input class="form-input" id="f-start" type="time" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">End Time</label>
+          <input class="form-input" id="f-end" type="time" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Category</label>
+        <div class="cat-select-wrap">
+          <div class="cat-dot" id="cat-dot"></div>
+          <select class="form-input" id="f-cat" onchange="updateCatDot()">
+            <option value="family">Family</option>
+            <option value="school">School</option>
+            <option value="sport">Sport</option>
+            <option value="health">Health</option>
+            <option value="travel">Travel</option>
+            <option value="errands">Errands</option>
+            <option value="general">General</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Who's involved?</label>
+        <div class="people-selector" id="people-selector"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Reminder</label>
+        <div class="reminder-opts">
+          <button class="reminder-btn" data-val="none"   onclick="pickReminder(this)">None</button>
+          <button class="reminder-btn" data-val="onday"  onclick="pickReminder(this)">On the day (8am)</button>
+          <button class="reminder-btn" data-val="1hour"  onclick="pickReminder(this)">1 hour before</button>
+          <button class="reminder-btn" data-val="30min"  onclick="pickReminder(this)">30 mins before</button>
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="submitEvent()">Add Event</button>
+    </div>
+  </div>
+
   <script>
-    // --- Today's date ---
-    const now = new Date();
-    const dateOpts = { day: 'numeric', month: 'long', year: 'numeric' };
-    const dayOpts  = { weekday: 'long' };
-    document.getElementById('today-date').textContent = now.toLocaleDateString('en-GB', dateOpts);
-    document.getElementById('today-day').textContent  = now.toLocaleDateString('en-GB', dayOpts);
+    // ─── CONFIG ──────────────────────────────────────────────────────────────
 
-    // --- Countdown to key date ---
-    const TARGET = new Date('2026-07-01T00:00:00');
+    const PEOPLE = ['Matt', 'Julie', 'Noah', 'Luca'];
+    const INITIALS = { Matt:'M', Julie:'J', Noah:'N', Luca:'L' };
+    const PERSON_COLORS = { Matt:'#4299e1', Julie:'#ed64a6', Noah:'#48bb78', Luca:'#ed8936' };
 
-    function updateCountdown() {
-      const diff = TARGET - new Date();
-      if (diff <= 0) {
-        document.getElementById('cd-days').textContent    = '0';
-        document.getElementById('cd-hours').textContent   = '0';
-        document.getElementById('cd-minutes').textContent = '0';
-        return;
-      }
-      const days    = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours   = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      document.getElementById('cd-days').textContent    = days;
-      document.getElementById('cd-hours').textContent   = hours;
-      document.getElementById('cd-minutes').textContent = minutes;
+    const CATS = {
+      family:  { label:'Family',  color:'#48bb78', bg:'#f0fff4', text:'#276749' },
+      school:  { label:'School',  color:'#4299e1', bg:'#ebf8ff', text:'#2b6cb0' },
+      sport:   { label:'Sport',   color:'#ed8936', bg:'#fffaf0', text:'#c05621' },
+      health:  { label:'Health',  color:'#fc8181', bg:'#fff5f5', text:'#c53030' },
+      travel:  { label:'Travel',  color:'#9f7aea', bg:'#faf5ff', text:'#553c9a' },
+      errands: { label:'Errands', color:'#ecc94b', bg:'#fffff0', text:'#744210' },
+      general: { label:'General', color:'#a0aec0', bg:'#f7fafc', text:'#4a5568' },
+    };
+
+    const REMINDER_LABELS = {
+      none:  null,
+      onday: 'On the day (8am)',
+      '1hour': '1 hour before',
+      '30min': '30 mins before',
+    };
+
+    // ─── DATE HELPERS ─────────────────────────────────────────────────────────
+
+    const toStr = d => d.toISOString().split('T')[0];
+
+    function todayStr() { return toStr(new Date()); }
+
+    function weekEndStr() {
+      const d = new Date(); d.setHours(0,0,0,0);
+      const day = d.getDay();
+      d.setDate(d.getDate() + (day === 0 ? 0 : 7 - day));
+      return toStr(d);
     }
 
+    function upcomingEndStr() {
+      const d = new Date(); d.setHours(0,0,0,0);
+      const day = d.getDay();
+      d.setDate(d.getDate() + (day === 0 ? 14 : 7 - day + 14));
+      return toStr(d);
+    }
+
+    function fmtDate(str) {
+      const [y,m,d] = str.split('-').map(Number);
+      return new Date(y,m-1,d).toLocaleDateString('en-GB', { weekday:'short', day:'numeric', month:'short' });
+    }
+
+    function fmtTime(t) {
+      if (!t) return '';
+      const [h,m] = t.split(':').map(Number);
+      return `${h%12||12}:${String(m).padStart(2,'0')}${h>=12?'pm':'am'}`;
+    }
+
+    // ─── DEFAULT EVENTS ──────────────────────────────────────────────────────
+    // Today = 2026-04-10 (Fri), week end = 2026-04-12 (Sun)
+    // Upcoming window = 2026-04-13 → 2026-04-26
+
+    const DEFAULT_EVENTS = [
+      { id:1,  name:'School Pickup',           date:'2026-04-10', startTime:'15:00', endTime:'15:30', category:'school',  people:['Matt','Noah','Luca'],           reminder:'onday'  },
+      { id:2,  name:'Evening Jog',             date:'2026-04-10', startTime:'18:30', endTime:'19:15', category:'sport',   people:['Matt','Julie'],                  reminder:'30min'  },
+      { id:3,  name:'Family Bike Ride',        date:'2026-04-11', startTime:'10:00', endTime:'12:00', category:'sport',   people:['Matt','Julie','Noah','Luca'],    reminder:'onday'  },
+      { id:4,  name:'Grocery Shopping',        date:'2026-04-11', startTime:'14:00', endTime:'15:00', category:'errands', people:['Julie'],                         reminder:'none'   },
+      { id:5,  name:'Sunday Roast',            date:'2026-04-12', startTime:'13:00', endTime:'15:00', category:'family',  people:['Matt','Julie','Noah','Luca'],    reminder:'none'   },
+      { id:6,  name:"Noah's Football Training",date:'2026-04-14', startTime:'16:00', endTime:'17:30', category:'sport',   people:['Matt','Noah'],                   reminder:'onday'  },
+      { id:7,  name:'Doctor Check-up',         date:'2026-04-15', startTime:'09:30', endTime:'10:00', category:'health',  people:['Luca'],                          reminder:'1hour'  },
+      { id:8,  name:'School Concert',          date:'2026-04-17', startTime:'18:00', endTime:'20:00', category:'school',  people:['Matt','Julie','Noah','Luca'],    reminder:'1hour'  },
+      { id:9,  name:'Family Day Out',          date:'2026-04-19', startTime:'10:00', endTime:'17:00', category:'family',  people:['Matt','Julie','Noah','Luca'],    reminder:'onday'  },
+      { id:10, name:'Spain Packing Day',       date:'2026-04-24', startTime:'10:00', endTime:'12:00', category:'travel',  people:['Matt','Julie','Noah','Luca'],    reminder:'onday'  },
+    ];
+
+    // ─── STATE ────────────────────────────────────────────────────────────────
+
+    let events = [];
+    let formPeople = [...PEOPLE];
+    let formReminder = 'none';
+
+    function loadEvents() {
+      const raw = localStorage.getItem('humariri-events');
+      events = raw ? JSON.parse(raw) : [...DEFAULT_EVENTS];
+    }
+    function saveEvents() {
+      localStorage.setItem('humariri-events', JSON.stringify(events));
+    }
+
+    // ─── RENDER EVENTS ───────────────────────────────────────────────────────
+
+    function renderAll() {
+      const today  = todayStr();
+      const wkEnd  = weekEndStr();
+      const upEnd  = upcomingEndStr();
+
+      renderList('list-today',    events.filter(e => e.date === today),               false);
+      renderList('list-week',     events.filter(e => e.date > today && e.date <= wkEnd), true);
+      renderList('list-upcoming', events.filter(e => e.date > wkEnd  && e.date <= upEnd), true);
+      renderStats();
+    }
+
+    function renderList(id, evts, showDate) {
+      const el = document.getElementById(id);
+      if (!evts.length) { el.innerHTML = '<div class="empty-state">No events</div>'; return; }
+      el.innerHTML = [...evts]
+        .sort((a,b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime))
+        .map(e => eventHTML(e, showDate))
+        .join('');
+    }
+
+    function eventHTML(e, showDate) {
+      const cat = CATS[e.category] || CATS.general;
+
+      const time = (e.startTime && e.endTime)
+        ? `${fmtTime(e.startTime)} – ${fmtTime(e.endTime)}`
+        : e.startTime ? fmtTime(e.startTime) : '';
+
+      const avatars = PEOPLE.map(p => {
+        const active = e.people?.includes(p);
+        return `<div class="avatar${active?'':' inactive'}" style="background:${active?PERSON_COLORS[p]:''}" title="${p}">${INITIALS[p]}</div>`;
+      }).join('');
+
+      const rl = REMINDER_LABELS[e.reminder];
+
+      return `
+        <div class="event-item">
+          <div class="event-top">
+            <div class="event-dot" style="background:${cat.color}"></div>
+            <div class="event-body">
+              <div class="event-name">${esc(e.name)}</div>
+              ${time ? `<div class="event-time">${time}</div>` : ''}
+              ${showDate ? `<div class="event-date-label">${fmtDate(e.date)}</div>` : ''}
+              ${rl ? `<div class="event-reminder">&#128276; ${rl}</div>` : ''}
+            </div>
+            <div class="event-right">
+              <span class="event-tag" style="background:${cat.bg};color:${cat.text}">${cat.label}</span>
+              <div class="people-grid">${avatars}</div>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function esc(s) {
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // ─── STATS BAR CHART ─────────────────────────────────────────────────────
+
+    function renderStats() {
+      const counts = Object.fromEntries(Object.keys(CATS).map(k => [k, 0]));
+      events.forEach(e => { if (counts[e.category] !== undefined) counts[e.category]++; });
+      const total = Math.max(Object.values(counts).reduce((a, b) => a + b, 0), 1);
+
+      document.getElementById('stats-list').innerHTML =
+        Object.entries(CATS).map(([key, cat]) => {
+          const n = counts[key];
+          const pct = Math.round((n / total) * 100);
+          return `
+            <div class="stat-row">
+              <div class="stat-label">${cat.label}</div>
+              <div class="stat-bar-wrap">
+                <div class="stat-bar" style="width:${pct}%;background:${cat.color}"></div>
+              </div>
+              <div class="stat-count">${n} · ${pct}%</div>
+            </div>`;
+        }).join('');
+    }
+
+    // ─── TODAY LABEL ─────────────────────────────────────────────────────────
+
+    function renderToday() {
+      const now = new Date();
+      document.getElementById('today-date').textContent =
+        now.toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' });
+      document.getElementById('today-day').textContent =
+        now.toLocaleDateString('en-GB', { weekday:'long' });
+    }
+
+    // ─── COUNTDOWN ───────────────────────────────────────────────────────────
+
+    const CD_TARGET = new Date('2026-07-01T00:00:00');
+
+    function updateCountdown() {
+      const diff = CD_TARGET - new Date();
+      if (diff <= 0) {
+        ['cd-days','cd-hours','cd-minutes','cd-seconds'].forEach(id => document.getElementById(id).textContent = '0');
+        return;
+      }
+      document.getElementById('cd-days').textContent    = Math.floor(diff / 86400000);
+      document.getElementById('cd-hours').textContent   = Math.floor((diff % 86400000) / 3600000);
+      document.getElementById('cd-minutes').textContent = Math.floor((diff % 3600000) / 60000);
+      document.getElementById('cd-seconds').textContent = Math.floor((diff % 60000) / 1000);
+    }
+
+    // ─── MODAL ────────────────────────────────────────────────────────────────
+
+    function openModal() {
+      document.getElementById('f-name').value  = '';
+      document.getElementById('f-date').value  = todayStr();
+      document.getElementById('f-start').value = '';
+      document.getElementById('f-end').value   = '';
+      document.getElementById('f-cat').value   = 'family';
+      updateCatDot();
+
+      formPeople   = [...PEOPLE];
+      formReminder = 'none';
+      renderFormPeople();
+      renderFormReminders();
+
+      document.getElementById('modal-overlay').classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('modal-overlay').classList.remove('open');
+    }
+
+    function handleOverlayClick(e) {
+      if (e.target.id === 'modal-overlay') closeModal();
+    }
+
+    function updateCatDot() {
+      const val = document.getElementById('f-cat').value;
+      document.getElementById('cat-dot').style.background = CATS[val]?.color || '#a0aec0';
+    }
+
+    function renderFormPeople() {
+      document.getElementById('people-selector').innerHTML = PEOPLE.map(p => `
+        <button class="person-toggle${formPeople.includes(p)?' on':''}"
+                style="background:${PERSON_COLORS[p]}"
+                onclick="togglePerson('${p}')">${INITIALS[p]}</button>
+      `).join('');
+    }
+
+    function togglePerson(name) {
+      formPeople = formPeople.includes(name) ? formPeople.filter(p=>p!==name) : [...formPeople, name];
+      renderFormPeople();
+    }
+
+    function renderFormReminders() {
+      document.querySelectorAll('.reminder-btn').forEach(btn => {
+        btn.classList.toggle('on', btn.dataset.val === formReminder);
+      });
+    }
+
+    function pickReminder(btn) {
+      formReminder = btn.dataset.val;
+      renderFormReminders();
+    }
+
+    // ─── ADD EVENT ───────────────────────────────────────────────────────────
+
+    function submitEvent() {
+      const name = document.getElementById('f-name').value.trim();
+      const date = document.getElementById('f-date').value;
+      if (!name || !date) { alert('Please enter an event name and date.'); return; }
+
+      const ev = {
+        id: Date.now(),
+        name,
+        date,
+        startTime: document.getElementById('f-start').value,
+        endTime:   document.getElementById('f-end').value,
+        category:  document.getElementById('f-cat').value,
+        people:    [...formPeople],
+        reminder:  formReminder,
+      };
+
+      events.push(ev);
+      saveEvents();
+      renderAll();
+      scheduleReminder(ev);
+      closeModal();
+    }
+
+    // ─── NOTIFICATIONS ───────────────────────────────────────────────────────
+
+    async function requestNotifPermission() {
+      if ('Notification' in window && Notification.permission === 'default') {
+        await Notification.requestPermission();
+      }
+    }
+
+    function showBanner(msg) {
+      const el = document.getElementById('notif-banner');
+      el.textContent = msg;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 5000);
+    }
+
+    function scheduleReminder(ev) {
+      if (!ev.reminder || ev.reminder === 'none' || !ev.startTime) return;
+
+      const [y,mo,d]  = ev.date.split('-').map(Number);
+      const [h,mi]    = ev.startTime.split(':').map(Number);
+      const evTime    = new Date(y, mo-1, d, h, mi, 0);
+
+      let remTime;
+      if      (ev.reminder === 'onday') remTime = new Date(y, mo-1, d, 8, 0, 0);
+      else if (ev.reminder === '1hour') remTime = new Date(evTime - 3600000);
+      else if (ev.reminder === '30min') remTime = new Date(evTime - 1800000);
+
+      const delay = remTime - Date.now();
+      if (delay <= 0) return;
+
+      const label = REMINDER_LABELS[ev.reminder];
+      setTimeout(() => {
+        const body = `${ev.name} — ${label}`;
+        if ('Notification' in window && Notification.permission === 'granted') {
+          new Notification('Humariri Calendar', { body });
+        } else {
+          showBanner('🔔 ' + body);
+        }
+      }, delay);
+    }
+
+    // ─── INIT ────────────────────────────────────────────────────────────────
+
+    renderToday();
+    loadEvents();
+    renderAll();
     updateCountdown();
-    setInterval(updateCountdown, 30000);
+    setInterval(updateCountdown, 1000);
+    updateCatDot();
+    renderFormPeople();
+    renderFormReminders();
+    requestNotifPermission();
+    events.forEach(scheduleReminder);
   </script>
 
 </body>
