@@ -16,22 +16,17 @@
       min-height: 100vh;
     }
 
-    /* Subtle Spanish flag hint — very faint red/gold stripes on the background */
-    body::before {
-      content: '';
+    /* Spanish crest watermark */
+    .crest-watermark {
       position: fixed;
-      inset: 0;
-      background: linear-gradient(
-        to bottom,
-        rgba(198,11,30,0.032)   0%,
-        rgba(198,11,30,0.032)  25%,
-        rgba(255,196,0,0.038)  25%,
-        rgba(255,196,0,0.038)  75%,
-        rgba(198,11,30,0.032)  75%,
-        rgba(198,11,30,0.032) 100%
-      );
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 320px;
+      opacity: 0.07;
       pointer-events: none;
       z-index: 0;
+      user-select: none;
     }
 
     /* ===== HEADER ===== */
@@ -63,7 +58,7 @@
       z-index: 1;
       max-width: 480px;
       margin: 0 auto;
-      padding: 16px 14px 100px;
+      padding: 16px 14px 135px;
       display: flex;
       flex-direction: column;
       gap: 14px;
@@ -154,6 +149,55 @@
       text-align: center;
     }
 
+    .event-tag.tappable-tag {
+      cursor: pointer;
+      transition: opacity 0.12s;
+    }
+    .event-tag.tappable-tag:active { opacity: 0.65; }
+
+    /* Category picker dropdown */
+    .cat-picker {
+      position: absolute;
+      right: 0;
+      top: calc(100% + 4px);
+      background: white;
+      border-radius: 11px;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.14);
+      padding: 5px;
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 116px;
+      border: 1px solid #f0f4f8;
+    }
+
+    .cat-pick-opt {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 9px;
+      border-radius: 7px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-align: left;
+      width: 100%;
+      font-family: inherit;
+      color: #1a202c;
+      transition: background 0.1s;
+    }
+    .cat-pick-opt:active { background: #f0f4f8; }
+
+    .cat-pick-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
     /* Right column: category tag + 2×2 people grid */
     .event-right {
       display: flex;
@@ -161,6 +205,7 @@
       align-items: center;
       gap: 6px;
       flex-shrink: 0;
+      position: relative;
     }
 
     .people-grid {
@@ -283,28 +328,231 @@
       flex-shrink: 0;
     }
 
-    /* ===== FAB ===== */
-    .fab {
+    /* ===== BOTTOM BAR ===== */
+    .add-bar {
       position: fixed;
-      bottom: 24px;
-      right: 20px;
-      width: 54px;
-      height: 54px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #4f46e5, #7c3aed);
-      color: white;
-      font-size: 1.7rem;
-      line-height: 1;
-      border: none;
-      cursor: pointer;
-      box-shadow: 0 4px 16px rgba(79,70,229,0.38);
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 10px 16px 18px;
+      background: linear-gradient(to top, #f0f4f8 65%, transparent);
+    }
+
+    .add-bar-inner {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .add-bar-btn {
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 100;
-      transition: transform 0.15s;
+      gap: 8px;
+      flex: 2;
+      padding: 15px;
+      border-radius: 14px;
+      border: none;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: white;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      cursor: pointer;
+      box-shadow: 0 4px 18px rgba(34,197,94,0.35);
+      transition: transform 0.12s, box-shadow 0.12s;
+      font-family: inherit;
     }
-    .fab:active { transform: scale(0.93); }
+    .add-bar-btn:active { transform: scale(0.98); box-shadow: 0 2px 10px rgba(34,197,94,0.25); }
+
+    .add-bar-btn .plus-icon {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .del-bar-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      flex: 1;
+      padding: 15px;
+      border-radius: 14px;
+      border: 1.5px solid #fca5a5;
+      background: white;
+      color: #ef4444;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.12s;
+      font-family: inherit;
+    }
+    .del-bar-btn:active { background: #fff5f5; transform: scale(0.98); }
+
+    /* Delete mode — action bar swap */
+    .del-action-bar {
+      display: none;
+      gap: 10px;
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    .del-action-bar.visible { display: flex; }
+    .add-bar-inner.hidden { display: none; }
+
+    .cancel-btn {
+      flex: 1;
+      padding: 15px;
+      border-radius: 14px;
+      border: 1.5px solid #e2e8f0;
+      background: white;
+      color: #718096;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.12s;
+    }
+    .cancel-btn:active { background: #f7fafc; }
+
+    .confirm-del-btn {
+      flex: 2;
+      padding: 15px;
+      border-radius: 14px;
+      border: none;
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      box-shadow: 0 4px 14px rgba(239,68,68,0.3);
+      transition: opacity 0.12s, transform 0.12s;
+      opacity: 0.45;
+      pointer-events: none;
+    }
+    .confirm-del-btn.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .confirm-del-btn:active { transform: scale(0.98); }
+
+    /* Selectable event items */
+    .event-item.selectable { cursor: pointer; padding-left: 2px; }
+    .event-item.selectable:active { background: #fef2f2; border-radius: 10px; }
+
+    .event-checkbox {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid #cbd5e0;
+      flex-shrink: 0;
+      margin-top: 3px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+    .selectable .event-checkbox { display: flex; }
+    .event-item.selected .event-checkbox {
+      background: #ef4444;
+      border-color: #ef4444;
+    }
+    .event-item.selected .event-checkbox::after {
+      content: '✓';
+      color: white;
+      font-size: 0.65rem;
+      font-weight: 700;
+    }
+    .event-item.selected {
+      background: #fff5f5;
+      border-radius: 10px;
+      margin: 0 -4px;
+      padding-left: 6px;
+      padding-right: 4px;
+    }
+
+    /* Confirm delete modal */
+    .confirm-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.42);
+      z-index: 300;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .confirm-overlay.open { opacity: 1; pointer-events: all; }
+
+    .confirm-box {
+      background: white;
+      border-radius: 18px;
+      padding: 24px 22px;
+      width: 100%;
+      max-width: 320px;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.16);
+      transform: scale(0.92);
+      transition: transform 0.2s;
+    }
+    .confirm-overlay.open .confirm-box { transform: scale(1); }
+
+    .confirm-icon {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+    .confirm-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #1a202c;
+      margin-bottom: 6px;
+    }
+    .confirm-sub {
+      font-size: 0.82rem;
+      color: #718096;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    .confirm-actions { display: flex; gap: 10px; }
+    .confirm-keep {
+      flex: 1;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1.5px solid #e2e8f0;
+      background: white;
+      color: #4a5568;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .confirm-delete {
+      flex: 1;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      background: #ef4444;
+      color: white;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+    }
 
     /* ===== MODAL ===== */
     .modal-overlay {
@@ -438,6 +686,118 @@
       font-weight: 600;
     }
 
+    /* ── Quick Select ── */
+    .qs-suggestions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+      min-height: 0;
+    }
+    .qs-pill {
+      padding: 4px 11px;
+      border-radius: 20px;
+      border: 1.5px solid #c4b5fd;
+      background: #f3f0ff;
+      color: #5b21b6;
+      font-size: 0.75rem;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.12s;
+    }
+    .qs-pill:hover { background: #ede9fe; border-color: #7c3aed; }
+    .qs-save-btn {
+      padding: 4px 11px;
+      border-radius: 20px;
+      border: 1.5px dashed #a0aec0;
+      background: white;
+      color: #718096;
+      font-size: 0.75rem;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.12s;
+    }
+    .qs-save-btn:hover { border-color: #7c3aed; color: #7c3aed; }
+
+    /* ── Recurring ── */
+    .recurring-section {
+      background: #f8f7ff;
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-top: 2px;
+    }
+    .recurring-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+    }
+    .recurring-header-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #4a5568;
+    }
+    .toggle-pill {
+      width: 42px;
+      height: 24px;
+      border-radius: 12px;
+      background: #cbd5e0;
+      position: relative;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+    .toggle-pill.on { background: #7c3aed; }
+    .toggle-pill::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: white;
+      transition: transform 0.2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .toggle-pill.on::after { transform: translateX(18px); }
+    .recurring-body {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .recurring-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .recurring-row label {
+      font-size: 0.78rem;
+      color: #718096;
+      white-space: nowrap;
+      min-width: 68px;
+    }
+    .recurring-select {
+      flex: 1;
+      padding: 7px 10px;
+      border-radius: 8px;
+      border: 1.5px solid #e2e8f0;
+      background: white;
+      font-size: 0.82rem;
+      color: #2d3748;
+      font-family: inherit;
+    }
+    .recurring-preview {
+      font-size: 0.76rem;
+      color: #7c3aed;
+      font-style: italic;
+      margin-top: 2px;
+      min-height: 1em;
+    }
+
     .btn-primary {
       width: 100%;
       padding: 13px;
@@ -475,6 +835,160 @@
       pointer-events: none;
     }
     .notif-banner.show { top: 14px; }
+
+    /* ===== EDITABLE EVENT CARDS ===== */
+    .event-name.tappable {
+      cursor: pointer;
+      display: inline-block;
+    }
+    .event-name.tappable:active { opacity: 0.55; }
+
+    .event-edit-hint {
+      font-size: 0.63rem;
+      color: #cbd5e0;
+      margin-top: 4px;
+      line-height: 1;
+    }
+
+    /* Inline avatar tap */
+    .avatar.tappable {
+      cursor: pointer;
+      transition: transform 0.12s, opacity 0.15s;
+    }
+    .avatar.tappable:active { transform: scale(0.82); }
+
+    /* ===== JOKE BUTTON ===== */
+    .joke-bar-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      width: 100%;
+      max-width: 480px;
+      margin: 8px auto 0;
+      padding: 11px;
+      border-radius: 12px;
+      border: none;
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: white;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 3px 12px rgba(37,99,235,0.32);
+      transition: transform 0.12s, box-shadow 0.12s;
+      font-family: inherit;
+      letter-spacing: 0.1px;
+    }
+    .joke-bar-btn:active { transform: scale(0.98); box-shadow: 0 1px 6px rgba(37,99,235,0.2); }
+
+    /* ===== JOKE OVERLAY ===== */
+    .joke-overlay {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(160deg, #fef9c3 0%, #fde68a 45%, #fcd34d 100%);
+      z-index: 400;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 20px 32px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.22s;
+    }
+    .joke-overlay.open { opacity: 1; pointer-events: all; }
+
+    .joke-emoji-header { font-size: 2.8rem; line-height: 1; margin-bottom: 6px; }
+
+    .joke-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #92400e;
+      margin-bottom: 22px;
+      letter-spacing: -0.3px;
+    }
+
+    .joke-card {
+      background: white;
+      border-radius: 22px;
+      padding: 28px 24px 22px;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 10px 36px rgba(0,0,0,0.13);
+      text-align: center;
+      transform: scale(0.94);
+      transition: transform 0.25s cubic-bezier(.32,.72,0,1);
+    }
+    .joke-overlay.open .joke-card { transform: scale(1); }
+
+    .joke-setup {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1a202c;
+      line-height: 1.65;
+      white-space: pre-line;
+    }
+
+    .joke-divider {
+      width: 36px;
+      height: 3px;
+      background: #fcd34d;
+      border-radius: 2px;
+      margin: 14px auto;
+    }
+
+    .joke-punchline {
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: #b45309;
+      line-height: 1.5;
+    }
+
+    .joke-counter {
+      font-size: 0.68rem;
+      color: #d97706;
+      margin-top: 14px;
+      opacity: 0.8;
+    }
+
+    .joke-actions {
+      display: flex;
+      gap: 12px;
+      width: 100%;
+      max-width: 380px;
+      margin-top: 18px;
+    }
+
+    .joke-next-btn {
+      flex: 2;
+      padding: 14px;
+      border-radius: 13px;
+      border: none;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: white;
+      font-size: 0.97rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      box-shadow: 0 4px 14px rgba(34,197,94,0.3);
+      transition: transform 0.12s;
+    }
+    .joke-next-btn:active { transform: scale(0.97); }
+
+    .joke-close-btn {
+      flex: 1;
+      padding: 14px;
+      border-radius: 13px;
+      border: 2px solid rgba(180,83,9,0.2);
+      background: white;
+      color: #92400e;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.12s;
+    }
+    .joke-close-btn:active { background: #fef3c7; }
   </style>
 </head>
 <body>
@@ -483,6 +997,47 @@
     <h1>Humariri Calendar</h1>
     <p>Family events &amp; countdowns</p>
   </header>
+
+  <!-- Spanish coat of arms watermark -->
+  <div class="crest-watermark" aria-hidden="true">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 280">
+      <!-- Crown -->
+      <path d="M63 57 L63 30 L80 44 L100 22 L120 44 L137 30 L137 57 Z" fill="#c60b1e"/>
+      <rect x="57" y="50" width="86" height="13" rx="5" fill="#c60b1e"/>
+      <!-- Shield body -->
+      <path d="M26 64 L174 64 L174 162 Q174 222 100 244 Q26 222 26 162 Z" fill="#c60b1e"/>
+      <!-- Quarter dividers -->
+      <line x1="100" y1="64" x2="100" y2="244" stroke="#f0f4f8" stroke-width="4"/>
+      <line x1="26" y1="153" x2="174" y2="153" stroke="#f0f4f8" stroke-width="4"/>
+      <!-- Q1 top-left: Castle (Castile) -->
+      <rect x="40" y="77" width="46" height="30" rx="2" fill="none" stroke="#f0f4f8" stroke-width="2.5"/>
+      <rect x="46" y="66" width="10" height="14" rx="1" fill="#f0f4f8"/>
+      <rect x="61" y="66" width="10" height="14" rx="1" fill="#f0f4f8"/>
+      <rect x="76" y="66" width="10" height="14" rx="1" fill="#f0f4f8"/>
+      <rect x="57" y="94" width="9" height="13" fill="#f0f4f8"/>
+      <!-- Q2 top-right: Lion (León) -->
+      <ellipse cx="137" cy="90" rx="9" ry="9" fill="none" stroke="#f0f4f8" stroke-width="2.5"/>
+      <path d="M115 105 Q120 94 128 100 Q134 88 145 94 Q155 104 148 116 Q140 126 128 124 Q116 122 115 112 Z" fill="none" stroke="#f0f4f8" stroke-width="2.5"/>
+      <!-- Q3 bottom-left: Bars (Aragon) -->
+      <line x1="34" y1="165" x2="92" y2="165" stroke="#f0f4f8" stroke-width="4"/>
+      <line x1="34" y1="177" x2="92" y2="177" stroke="#f0f4f8" stroke-width="4"/>
+      <line x1="34" y1="189" x2="92" y2="189" stroke="#f0f4f8" stroke-width="4"/>
+      <line x1="34" y1="201" x2="92" y2="201" stroke="#f0f4f8" stroke-width="4"/>
+      <!-- Q4 bottom-right: Chains (Navarre) -->
+      <rect x="106" y="160" width="60" height="60" rx="2" fill="none" stroke="#f0f4f8" stroke-width="2.5"/>
+      <line x1="106" y1="190" x2="166" y2="190" stroke="#f0f4f8" stroke-width="2"/>
+      <line x1="136" y1="160" x2="136" y2="220" stroke="#f0f4f8" stroke-width="2"/>
+      <circle cx="121" cy="175" r="3" fill="#f0f4f8"/>
+      <circle cx="136" cy="175" r="3" fill="#f0f4f8"/>
+      <circle cx="151" cy="175" r="3" fill="#f0f4f8"/>
+      <circle cx="121" cy="205" r="3" fill="#f0f4f8"/>
+      <circle cx="136" cy="205" r="3" fill="#f0f4f8"/>
+      <circle cx="151" cy="205" r="3" fill="#f0f4f8"/>
+      <!-- Pomegranate base -->
+      <ellipse cx="100" cy="252" rx="14" ry="10" fill="#c60b1e"/>
+      <path d="M94 244 Q100 236 106 244" fill="none" stroke="#c60b1e" stroke-width="3"/>
+    </svg>
+  </div>
 
   <main>
 
@@ -510,6 +1065,9 @@
       <div class="card-title">Upcoming Events</div>
       <div class="event-list" id="list-upcoming"></div>
     </div>
+
+    <!-- Edit hint -->
+    <p style="text-align:center;font-size:0.7rem;color:#a0aec0;margin-top:-6px;">✏ tap an event name to edit</p>
 
     <!-- Countdown -->
     <div class="card">
@@ -543,8 +1101,58 @@
 
   </main>
 
-  <!-- FAB -->
-  <button class="fab" onclick="openModal()" title="Add event">+</button>
+  <!-- Bottom bar -->
+  <div class="add-bar">
+    <!-- Normal state -->
+    <div class="add-bar-inner" id="normal-bar">
+      <button class="add-bar-btn" onclick="openModal()">
+        <span class="plus-icon">+</span>
+        Add Event
+      </button>
+      <button class="del-bar-btn" onclick="enterDeleteMode()">
+        &#128465; Delete
+      </button>
+    </div>
+    <!-- Joke button (hidden in delete mode) -->
+    <button class="joke-bar-btn" id="joke-bar-btn" onclick="openJoke()">Joke Button!!</button>
+
+    <!-- Delete mode state -->
+    <div class="del-action-bar" id="delete-bar">
+      <button class="cancel-btn" onclick="exitDeleteMode()">Cancel</button>
+      <button class="confirm-del-btn" id="confirm-del-btn" onclick="showConfirm()">
+        Delete <span id="del-count">0</span> event<span id="del-plural"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Confirm delete modal -->
+  <div class="confirm-overlay" id="confirm-overlay">
+    <div class="confirm-box">
+      <div class="confirm-icon">&#128465;&#65039;</div>
+      <div class="confirm-title" id="confirm-title">Delete events?</div>
+      <div class="confirm-sub" id="confirm-sub">This cannot be undone.</div>
+      <div class="confirm-actions">
+        <button class="confirm-keep" onclick="hideConfirm()">Keep</button>
+        <button class="confirm-delete" onclick="executeDelete()">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Joke Overlay -->
+  <div class="joke-overlay" id="joke-overlay">
+    <div class="joke-emoji-header">😂</div>
+    <div class="joke-title">Joke Time!</div>
+    <div class="joke-card">
+      <div class="joke-setup" id="joke-setup"></div>
+      <div class="joke-divider"></div>
+      <div class="joke-punchline" id="joke-punchline"></div>
+      <div class="joke-counter" id="joke-counter"></div>
+    </div>
+    <div class="joke-actions">
+      <button class="joke-next-btn" onclick="nextJoke()">Next Joke 👉</button>
+      <button class="joke-close-btn" onclick="closeJoke()">Close ✕</button>
+    </div>
+  </div>
 
   <!-- In-app notification banner -->
   <div class="notif-banner" id="notif-banner"></div>
@@ -553,11 +1161,13 @@
   <div class="modal-overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
     <div class="modal-sheet">
       <div class="modal-handle"></div>
-      <div class="modal-title">Add Event</div>
+      <div class="modal-title" id="modal-title">Add Event</div>
 
       <div class="form-group">
         <label class="form-label">Event Name</label>
-        <input class="form-input" id="f-name" type="text" placeholder="e.g. School pickup" />
+        <input class="form-input" id="f-name" type="text" placeholder="e.g. School pickup"
+               oninput="updateQuickSelect()" autocomplete="off" />
+        <div class="qs-suggestions" id="qs-suggestions"></div>
       </div>
 
       <div class="form-group">
@@ -607,16 +1217,45 @@
         </div>
       </div>
 
-      <button class="btn-primary" onclick="submitEvent()">Add Event</button>
+      <div class="recurring-section" id="recurring-section">
+        <div class="recurring-header" onclick="toggleRecurring()">
+          <span class="recurring-header-label">Repeating event</span>
+          <button class="toggle-pill" id="recurring-toggle" onclick="event.stopPropagation();toggleRecurring()"></button>
+        </div>
+        <div class="recurring-body" id="recurring-body" style="display:none">
+          <div class="recurring-row">
+            <label>Frequency</label>
+            <select class="recurring-select" id="r-freq" onchange="updateRecurringPreview()">
+              <option value="daily">Every day</option>
+              <option value="weekly" selected>Every week</option>
+              <option value="fortnightly">Every 2 weeks</option>
+              <option value="monthly">Every month</option>
+            </select>
+          </div>
+          <div class="recurring-row">
+            <label>Duration</label>
+            <select class="recurring-select" id="r-dur" onchange="updateRecurringPreview()">
+              <option value="1">1 month</option>
+              <option value="2">2 months</option>
+              <option value="3" selected>3 months</option>
+              <option value="6">6 months</option>
+              <option value="12">12 months</option>
+            </select>
+          </div>
+          <div class="recurring-preview" id="recurring-preview"></div>
+        </div>
+      </div>
+
+      <button class="btn-primary" id="modal-submit-btn" onclick="submitEvent()">Add Event</button>
     </div>
   </div>
 
   <script>
     // ─── CONFIG ──────────────────────────────────────────────────────────────
 
-    const PEOPLE = ['Matt', 'Julie', 'Noah', 'Luca'];
-    const INITIALS = { Matt:'M', Julie:'J', Noah:'N', Luca:'L' };
-    const PERSON_COLORS = { Matt:'#4299e1', Julie:'#ed64a6', Noah:'#48bb78', Luca:'#ed8936' };
+    const PEOPLE = ['Mark', 'Julie', 'Ryan', 'Noah'];
+    const INITIALS = { Mark:'M', Julie:'J', Ryan:'R', Noah:'N' };
+    const PERSON_COLORS = { Mark:'#4299e1', Julie:'#ed64a6', Ryan:'#48bb78', Noah:'#ed8936' };
 
     const CATS = {
       family:  { label:'Family',  color:'#48bb78', bg:'#f0fff4', text:'#276749' },
@@ -671,16 +1310,16 @@
     // Upcoming window = 2026-04-13 → 2026-04-26
 
     const DEFAULT_EVENTS = [
-      { id:1,  name:'School Pickup',           date:'2026-04-10', startTime:'15:00', endTime:'15:30', category:'school',  people:['Matt','Noah','Luca'],           reminder:'onday'  },
-      { id:2,  name:'Evening Jog',             date:'2026-04-10', startTime:'18:30', endTime:'19:15', category:'sport',   people:['Matt','Julie'],                  reminder:'30min'  },
-      { id:3,  name:'Family Bike Ride',        date:'2026-04-11', startTime:'10:00', endTime:'12:00', category:'sport',   people:['Matt','Julie','Noah','Luca'],    reminder:'onday'  },
+      { id:1,  name:'School Pickup',           date:'2026-04-10', startTime:'15:00', endTime:'15:30', category:'school',  people:['Mark','Ryan','Noah'],            reminder:'onday'  },
+      { id:2,  name:'Evening Jog',             date:'2026-04-10', startTime:'18:30', endTime:'19:15', category:'sport',   people:['Mark','Julie'],                  reminder:'30min'  },
+      { id:3,  name:'Family Bike Ride',        date:'2026-04-11', startTime:'10:00', endTime:'12:00', category:'sport',   people:['Mark','Julie','Ryan','Noah'],    reminder:'onday'  },
       { id:4,  name:'Grocery Shopping',        date:'2026-04-11', startTime:'14:00', endTime:'15:00', category:'errands', people:['Julie'],                         reminder:'none'   },
-      { id:5,  name:'Sunday Roast',            date:'2026-04-12', startTime:'13:00', endTime:'15:00', category:'family',  people:['Matt','Julie','Noah','Luca'],    reminder:'none'   },
-      { id:6,  name:"Noah's Football Training",date:'2026-04-14', startTime:'16:00', endTime:'17:30', category:'sport',   people:['Matt','Noah'],                   reminder:'onday'  },
-      { id:7,  name:'Doctor Check-up',         date:'2026-04-15', startTime:'09:30', endTime:'10:00', category:'health',  people:['Luca'],                          reminder:'1hour'  },
-      { id:8,  name:'School Concert',          date:'2026-04-17', startTime:'18:00', endTime:'20:00', category:'school',  people:['Matt','Julie','Noah','Luca'],    reminder:'1hour'  },
-      { id:9,  name:'Family Day Out',          date:'2026-04-19', startTime:'10:00', endTime:'17:00', category:'family',  people:['Matt','Julie','Noah','Luca'],    reminder:'onday'  },
-      { id:10, name:'Spain Packing Day',       date:'2026-04-24', startTime:'10:00', endTime:'12:00', category:'travel',  people:['Matt','Julie','Noah','Luca'],    reminder:'onday'  },
+      { id:5,  name:'Sunday Roast',            date:'2026-04-12', startTime:'13:00', endTime:'15:00', category:'family',  people:['Mark','Julie','Ryan','Noah'],    reminder:'none'   },
+      { id:6,  name:"Noah's Football Training",date:'2026-04-14', startTime:'16:00', endTime:'17:30', category:'sport',   people:['Mark','Noah'],                   reminder:'onday'  },
+      { id:7,  name:'Doctor Check-up',         date:'2026-04-15', startTime:'09:30', endTime:'10:00', category:'health',  people:['Ryan'],                          reminder:'1hour'  },
+      { id:8,  name:'School Concert',          date:'2026-04-17', startTime:'18:00', endTime:'20:00', category:'school',  people:['Mark','Julie','Ryan','Noah'],    reminder:'1hour'  },
+      { id:9,  name:'Family Day Out',          date:'2026-04-19', startTime:'10:00', endTime:'17:00', category:'family',  people:['Mark','Julie','Ryan','Noah'],    reminder:'onday'  },
+      { id:10, name:'Spain Packing Day',       date:'2026-04-24', startTime:'10:00', endTime:'12:00', category:'travel',  people:['Mark','Julie','Ryan','Noah'],    reminder:'onday'  },
     ];
 
     // ─── STATE ────────────────────────────────────────────────────────────────
@@ -688,6 +1327,58 @@
     let events = [];
     let formPeople = [...PEOPLE];
     let formReminder = 'none';
+    let deleteMode = false;
+    let selectedIds = new Set();
+    let editingId = null;
+    let activeCategoryPicker = null;
+    let recurringEnabled = false;
+
+    // ─── QUICK SELECT NAMES ──────────────────────────────────────────────────
+    const QS_DEFAULT_NAMES = [
+      'Football training','Swimming lessons','School pickup','School drop-off',
+      'Doctor appointment','Dentist appointment','Birthday party','Grocery shopping',
+      'Piano lesson','Soccer game','Parent-teacher night','Playdate',
+      'Haircut','Gym','Date night','Family dinner','Movie night',
+      'Library visit','Park walk','Bike ride','Rugby training',
+      'Basketball','Tennis','Volleyball','Scouts',
+    ];
+
+    function getQuickSelectNames() {
+      const saved = JSON.parse(localStorage.getItem('humariri-qs') || '[]');
+      return [...new Set([...QS_DEFAULT_NAMES, ...saved])];
+    }
+
+    function saveToQuickSelect() {
+      const name = document.getElementById('f-name').value.trim();
+      if (!name) return;
+      const saved = JSON.parse(localStorage.getItem('humariri-qs') || '[]');
+      if (!saved.includes(name) && !QS_DEFAULT_NAMES.includes(name)) {
+        saved.push(name);
+        localStorage.setItem('humariri-qs', JSON.stringify(saved));
+      }
+      updateQuickSelect();
+    }
+
+    function updateQuickSelect() {
+      const val = document.getElementById('f-name').value.trim().toLowerCase();
+      const all = getQuickSelectNames();
+      const container = document.getElementById('qs-suggestions');
+      if (!val) { container.innerHTML = ''; return; }
+      const matches = all.filter(n => n.toLowerCase().includes(val));
+      const alreadyInList = all.some(n => n.toLowerCase() === val);
+      const pills = matches.map(n =>
+        `<button class="qs-pill" onclick="selectQSName('${n.replace(/'/g,"&#39;")}')">${n}</button>`
+      ).join('');
+      const saveBtn = !alreadyInList
+        ? `<button class="qs-save-btn" onclick="saveToQuickSelect()">+ Save "${document.getElementById('f-name').value.trim()}"</button>`
+        : '';
+      container.innerHTML = pills + saveBtn;
+    }
+
+    function selectQSName(name) {
+      document.getElementById('f-name').value = name;
+      document.getElementById('qs-suggestions').innerHTML = '';
+    }
 
     function loadEvents() {
       const raw = localStorage.getItem('humariri-events');
@@ -728,23 +1419,43 @@
 
       const avatars = PEOPLE.map(p => {
         const active = e.people?.includes(p);
-        return `<div class="avatar${active?'':' inactive'}" style="background:${active?PERSON_COLORS[p]:''}" title="${p}">${INITIALS[p]}</div>`;
+        const avatarClick = !deleteMode
+          ? `onclick="event.stopPropagation();toggleEventPerson(${e.id},'${p}')"` : '';
+        return `<div class="avatar${active?'':' inactive'}${!deleteMode?' tappable':''}"
+                     style="background:${active?PERSON_COLORS[p]:''}"
+                     ${avatarClick} title="${p}">${INITIALS[p]}</div>`;
       }).join('');
 
       const rl = REMINDER_LABELS[e.reminder];
+      const selClass = deleteMode
+        ? ' selectable' + (selectedIds.has(e.id) ? ' selected' : '')
+        : '';
+      const cardClick = deleteMode ? `onclick="toggleSelectEvent(${e.id})"` : '';
+      const nameClick = !deleteMode ? `onclick="openModal(${e.id})"` : '';
 
       return `
-        <div class="event-item">
+        <div class="event-item${selClass}" ${cardClick}>
           <div class="event-top">
+            <div class="event-checkbox"></div>
             <div class="event-dot" style="background:${cat.color}"></div>
             <div class="event-body">
-              <div class="event-name">${esc(e.name)}</div>
+              <div class="event-name${!deleteMode?' tappable':''}" ${nameClick}>${esc(e.name)}</div>
               ${time ? `<div class="event-time">${time}</div>` : ''}
               ${showDate ? `<div class="event-date-label">${fmtDate(e.date)}</div>` : ''}
               ${rl ? `<div class="event-reminder">&#128276; ${rl}</div>` : ''}
             </div>
             <div class="event-right">
-              <span class="event-tag" style="background:${cat.bg};color:${cat.text}">${cat.label}</span>
+              <span class="event-tag${!deleteMode?' tappable-tag':''}"
+                    style="background:${cat.bg};color:${cat.text}"
+                    ${!deleteMode?`onclick="event.stopPropagation();toggleCatPicker(${e.id})"`:''}
+              >${cat.label} ${!deleteMode?'▾':''}</span>
+              ${activeCategoryPicker===e.id && !deleteMode ? `
+              <div class="cat-picker" onclick="event.stopPropagation()">
+                ${Object.entries(CATS).map(([key,c])=>`
+                  <button class="cat-pick-opt" onclick="setCatForEvent(${e.id},'${key}')">
+                    <span class="cat-pick-dot" style="background:${c.color}"></span>${c.label}
+                  </button>`).join('')}
+              </div>` : ''}
               <div class="people-grid">${avatars}</div>
             </div>
           </div>
@@ -803,20 +1514,85 @@
       document.getElementById('cd-seconds').textContent = Math.floor((diff % 60000) / 1000);
     }
 
+    // ─── RECURRING ───────────────────────────────────────────────────────────
+
+    function toggleRecurring() {
+      recurringEnabled = !recurringEnabled;
+      document.getElementById('recurring-toggle').classList.toggle('on', recurringEnabled);
+      document.getElementById('recurring-body').style.display = recurringEnabled ? 'flex' : 'none';
+      if (recurringEnabled) updateRecurringPreview();
+    }
+
+    function updateRecurringPreview() {
+      const freq = document.getElementById('r-freq').value;
+      const dur  = parseInt(document.getElementById('r-dur').value);
+      const freqLabels = { daily:'day', weekly:'week', fortnightly:'2 weeks', monthly:'month' };
+      const count = countRecurringEvents(freq, dur);
+      document.getElementById('recurring-preview').textContent =
+        `Creates ${count} events — one every ${freqLabels[freq]} for ${dur} month${dur>1?'s':''}`;
+    }
+
+    function countRecurringEvents(freq, durationMonths) {
+      const intervals = { daily:1, weekly:7, fortnightly:14, monthly:0 };
+      const startDate = new Date(document.getElementById('f-date').value + 'T00:00:00');
+      if (isNaN(startDate)) return 0;
+      const endDate = new Date(startDate);
+      endDate.setMonth(endDate.getMonth() + durationMonths);
+      let count = 0, cur = new Date(startDate);
+      while (cur <= endDate) {
+        count++;
+        if (freq === 'monthly') { cur = new Date(cur); cur.setMonth(cur.getMonth() + 1); }
+        else cur.setDate(cur.getDate() + intervals[freq]);
+      }
+      return count;
+    }
+
+    function generateRecurringEvents(fields, freq, durationMonths) {
+      const intervals = { daily:1, weekly:7, fortnightly:14, monthly:0 };
+      const startDate = new Date(fields.date + 'T00:00:00');
+      const endDate   = new Date(startDate);
+      endDate.setMonth(endDate.getMonth() + durationMonths);
+      const groupId = Date.now();
+      const evs = [];
+      let cur = new Date(startDate);
+      while (cur <= endDate) {
+        evs.push({ id: groupId + evs.length, ...fields, date: toStr(cur), recurringGroupId: groupId });
+        if (freq === 'monthly') { cur = new Date(cur); cur.setMonth(cur.getMonth() + 1); }
+        else cur.setDate(cur.getDate() + intervals[freq]);
+      }
+      return evs;
+    }
+
     // ─── MODAL ────────────────────────────────────────────────────────────────
 
-    function openModal() {
-      document.getElementById('f-name').value  = '';
-      document.getElementById('f-date').value  = todayStr();
-      document.getElementById('f-start').value = '';
-      document.getElementById('f-end').value   = '';
-      document.getElementById('f-cat').value   = 'family';
+    function openModal(id = null) {
+      editingId = id;
+      const ev = id != null ? events.find(e => e.id === id) : null;
+
+      document.getElementById('f-name').value  = ev ? ev.name       : '';
+      document.getElementById('f-date').value  = ev ? ev.date       : todayStr();
+      document.getElementById('f-start').value = ev ? ev.startTime  : '';
+      document.getElementById('f-end').value   = ev ? ev.endTime    : '';
+      document.getElementById('f-cat').value   = ev ? ev.category   : 'family';
       updateCatDot();
 
-      formPeople   = [...PEOPLE];
-      formReminder = 'none';
+      formPeople   = ev ? [...(ev.people || [])] : [];
+      formReminder = ev ? (ev.reminder || 'none') : 'none';
       renderFormPeople();
       renderFormReminders();
+
+      const isEdit = ev != null;
+      document.getElementById('modal-title').textContent      = isEdit ? 'Edit Event'    : 'Add Event';
+      document.getElementById('modal-submit-btn').textContent = isEdit ? 'Save Changes'  : 'Add Event';
+
+      // Reset quick select
+      document.getElementById('qs-suggestions').innerHTML = '';
+
+      // Recurring: hide when editing, reset when adding
+      recurringEnabled = false;
+      document.getElementById('recurring-section').style.display = isEdit ? 'none' : '';
+      document.getElementById('recurring-toggle').classList.remove('on');
+      document.getElementById('recurring-body').style.display = 'none';
 
       document.getElementById('modal-overlay').classList.add('open');
     }
@@ -865,8 +1641,7 @@
       const date = document.getElementById('f-date').value;
       if (!name || !date) { alert('Please enter an event name and date.'); return; }
 
-      const ev = {
-        id: Date.now(),
+      const fields = {
         name,
         date,
         startTime: document.getElementById('f-start').value,
@@ -876,10 +1651,23 @@
         reminder:  formReminder,
       };
 
-      events.push(ev);
+      if (editingId != null) {
+        const idx = events.findIndex(e => e.id === editingId);
+        if (idx !== -1) events[idx] = { ...events[idx], ...fields };
+        editingId = null;
+      } else if (recurringEnabled) {
+        const freq = document.getElementById('r-freq').value;
+        const dur  = parseInt(document.getElementById('r-dur').value);
+        const newEvs = generateRecurringEvents(fields, freq, dur);
+        newEvs.forEach(ev => { events.push(ev); scheduleReminder(ev); });
+      } else {
+        const ev = { id: Date.now(), ...fields };
+        events.push(ev);
+        scheduleReminder(ev);
+      }
+
       saveEvents();
       renderAll();
-      scheduleReminder(ev);
       closeModal();
     }
 
@@ -922,6 +1710,257 @@
           showBanner('🔔 ' + body);
         }
       }, delay);
+    }
+
+    // ─── DELETE MODE ─────────────────────────────────────────────────────────
+
+    function enterDeleteMode() {
+      deleteMode = true;
+      selectedIds.clear();
+      activeCategoryPicker = null;
+      document.getElementById('normal-bar').classList.add('hidden');
+      document.getElementById('delete-bar').classList.add('visible');
+      document.getElementById('joke-bar-btn').style.display = 'none';
+      updateDeleteBar();
+      renderAll();
+    }
+
+    function exitDeleteMode() {
+      deleteMode = false;
+      selectedIds.clear();
+      document.getElementById('normal-bar').classList.remove('hidden');
+      document.getElementById('delete-bar').classList.remove('visible');
+      document.getElementById('joke-bar-btn').style.display = '';
+      renderAll();
+    }
+
+    function toggleSelectEvent(id) {
+      if (selectedIds.has(id)) selectedIds.delete(id);
+      else selectedIds.add(id);
+      updateDeleteBar();
+      renderAll();
+    }
+
+    function updateDeleteBar() {
+      const n = selectedIds.size;
+      document.getElementById('del-count').textContent = n;
+      document.getElementById('del-plural').textContent = n === 1 ? '' : 's';
+      const btn = document.getElementById('confirm-del-btn');
+      btn.classList.toggle('active', n > 0);
+    }
+
+    function showConfirm() {
+      const n = selectedIds.size;
+      if (n === 0) return;
+      document.getElementById('confirm-title').textContent =
+        `Delete ${n} event${n === 1 ? '' : 's'}?`;
+      const names = events
+        .filter(e => selectedIds.has(e.id))
+        .map(e => e.name)
+        .join(', ');
+      document.getElementById('confirm-sub').textContent =
+        `"${names}" will be permanently removed.`;
+      document.getElementById('confirm-overlay').classList.add('open');
+    }
+
+    function hideConfirm() {
+      document.getElementById('confirm-overlay').classList.remove('open');
+    }
+
+    function executeDelete() {
+      events = events.filter(e => !selectedIds.has(e.id));
+      saveEvents();
+      hideConfirm();
+      exitDeleteMode();
+    }
+
+    // ─── INLINE CATEGORY PICKER ──────────────────────────────────────────────
+
+    function toggleCatPicker(eventId) {
+      activeCategoryPicker = activeCategoryPicker === eventId ? null : eventId;
+      renderAll();
+    }
+
+    function setCatForEvent(eventId, category) {
+      const ev = events.find(e => e.id === eventId);
+      if (!ev) return;
+      ev.category = category;
+      activeCategoryPicker = null;
+      saveEvents();
+      renderAll();
+    }
+
+    // Close picker when tapping anywhere else on the page
+    document.addEventListener('click', () => {
+      if (activeCategoryPicker !== null) {
+        activeCategoryPicker = null;
+        renderAll();
+      }
+    });
+
+    // ─── INLINE PEOPLE TOGGLE ────────────────────────────────────────────────
+
+    function toggleEventPerson(eventId, personName) {
+      if (deleteMode) return;
+      const ev = events.find(e => e.id === eventId);
+      if (!ev) return;
+      if (!ev.people) ev.people = [];
+      if (ev.people.includes(personName)) {
+        ev.people = ev.people.filter(p => p !== personName);
+      } else {
+        ev.people = [...ev.people, personName];
+      }
+      saveEvents();
+      renderAll();
+    }
+
+    // ─── JOKES ───────────────────────────────────────────────────────────────
+
+    const JOKES = [
+      // Knock knock
+      { q:"Knock knock!\n— Who's there?\nLettuce\n— Lettuce who?", a:"Lettuce in, it's cold out here! 🥬" },
+      { q:"Knock knock!\n— Who's there?\nBoo\n— Boo who?", a:"Don't cry, it's just a joke! 😄" },
+      { q:"Knock knock!\n— Who's there?\nAtch\n— Atch who?", a:"Bless you! 🤧" },
+      { q:"Knock knock!\n— Who's there?\nOrange\n— Orange who?", a:"Orange you glad I didn't say banana? 🍊" },
+      { q:"Knock knock!\n— Who's there?\nOwl\n— Owl who?", a:"Owl always love you! 🦉" },
+      { q:"Knock knock!\n— Who's there?\nNobel\n— Nobel who?", a:"Nobel, that's why I knocked! 🚪" },
+      { q:"Knock knock!\n— Who's there?\nTank\n— Tank who?", a:"You're welcome! 😄" },
+      { q:"Knock knock!\n— Who's there?\nCanoe\n— Canoe who?", a:"Canoe help me with my homework? 🛶" },
+      { q:"Knock knock!\n— Who's there?\nHawaii\n— Hawaii who?", a:"I'm fine, Hawaii you? 🌺" },
+      { q:"Knock knock!\n— Who's there?\nWooden shoe\n— Wooden shoe who?", a:"Wooden shoe like to hear another joke? 👟" },
+      { q:"Knock knock!\n— Who's there?\nInterrupting cow\n— Interrupting cow wh—", a:"MOO! 🐮" },
+      { q:"Knock knock!\n— Who's there?\nPolice\n— Police who?", a:"Police let me in, it's freezing out here! 🥶" },
+      { q:"Knock knock!\n— Who's there?\nAlpaca\n— Alpaca who?", a:"Alpaca the suitcase, you load the car! 🦙" },
+      { q:"Knock knock!\n— Who's there?\nCow says\n— Cow says who?", a:"No silly, cow says MOO! 🐄" },
+      { q:"Knock knock!\n— Who's there?\nNana\n— Nana who?", a:"Nana your business! 🍌" },
+      // Animals
+      { q:"Why do cows wear bells?", a:"Because their horns don't work! 🐮" },
+      { q:"What do you call a bear with no teeth?", a:"A gummy bear! 🐻" },
+      { q:"What do you call a sleeping dinosaur?", a:"A dino-snore! 🦕" },
+      { q:"What do you call a dinosaur that crashes their car?", a:"Tyrannosaurus wrecks! 🦖" },
+      { q:"What do you call a lazy kangaroo?", a:"A pouch potato! 🦘" },
+      { q:"What do you call a pig that does karate?", a:"A pork chop! 🥋" },
+      { q:"What do you call a dog magician?", a:"A labra-cadabra-dor! 🐶" },
+      { q:"What do you call a cow on a trampoline?", a:"A milkshake! 🥛" },
+      { q:"What do you get if you cross a parrot with a centipede?", a:"A walkie-talkie! 🦜" },
+      { q:"Why do fish swim in saltwater?", a:"Because pepper makes them sneeze! 🐟" },
+      { q:"What do you call two birds in love?", a:"Tweet hearts! 🐦" },
+      { q:"What do you call a bee that can't make up its mind?", a:"A maybe! 🐝" },
+      { q:"Why did the duck cross the road?", a:"To prove he wasn't chicken! 🦆" },
+      { q:"What do you call a rabbit that tells jokes?", a:"A funny bunny! 🐰" },
+      { q:"What do you call a grumpy cat?", a:"A crabby tabby! 🐱" },
+      // Food
+      { q:"What do you call a fake noodle?", a:"An impasta! 🍝" },
+      { q:"What do you call cheese that isn't yours?", a:"Nacho cheese! 🧀" },
+      { q:"Why did the banana go to the doctor?", a:"Because it wasn't peeling well! 🍌" },
+      { q:"Why did the cookie go to the doctor?", a:"Because it was feeling crummy! 🍪" },
+      { q:"Why did the tomato turn red?", a:"Because it saw the salad dressing! 🍅" },
+      { q:"Why did the teddy bear say no to dessert?", a:"Because she was already stuffed! 🧸" },
+      { q:"What do you call a sad coffee?", a:"A depresso! ☕" },
+      { q:"What do you call a cold hot dog?", a:"A chilli dog! 🌭" },
+      { q:"Why did the orange stop rolling down the hill?", a:"Because it ran out of juice! 🍊" },
+      { q:"Why did the banana split?", a:"Because it saw the ice cream! 🍦" },
+      // School
+      { q:"Why did the maths book look so sad?", a:"Because it had too many problems! 📚" },
+      { q:"Why did the student eat his homework?", a:"Because the teacher told him it was a piece of cake! 🎂" },
+      { q:"Why did the student eat his pencil?", a:"The teacher told him to draw a conclusion! ✏️" },
+      { q:"Why did the scarecrow win an award?", a:"Because he was outstanding in his field! 🏆" },
+      { q:"Why did the music teacher go to jail?", a:"For getting into too much treble! 🎵" },
+      { q:"Why did the bicycle fall over?", a:"Because it was two-tired! 🚲" },
+      { q:"Why did the clock get in trouble?", a:"Because it tocked too much! 🕐" },
+      { q:"Why did the lamp go to school?", a:"To get a little brighter! 💡" },
+      { q:"What do elves learn in school?", a:"The elf-abet! 🧝" },
+      { q:"Why did the student bring a ladder to school?", a:"He wanted to go to high school! 🪜" },
+      // Spooky
+      { q:"Why don't skeletons fight each other?", a:"They don't have the guts! 💀" },
+      { q:"Why are ghosts bad liars?", a:"Because you can see right through them! 👻" },
+      { q:"What's a skeleton's least favourite room?", a:"The living room! 🏠" },
+      { q:"Why didn't the skeleton go to the dance?", a:"Because he had no body to go with! 💀" },
+      { q:"What do vampires take when they're sick?", a:"Coffin drops! 🧛" },
+      { q:"Why did the ghost go to the party?", a:"For the boos! 👻" },
+      { q:"What kind of street does a ghost live on?", a:"A dead end! 👻" },
+      { q:"What do you call a snowman with a six-pack?", a:"An abdominal snowman! ⛄" },
+      // Space & science
+      { q:"Why don't scientists trust atoms?", a:"Because they make up everything! ⚛️" },
+      { q:"Why did the astronaut break up with their partner?", a:"Because they needed more space! 🚀" },
+      { q:"How do you organise a space party?", a:"You planet! 🪐" },
+      { q:"What did the ocean say to the beach?", a:"Nothing, it just waved! 🌊" },
+      { q:"Why did the computer go to the doctor?", a:"Because it had a virus! 💻" },
+      { q:"What's the best thing about Switzerland?", a:"I don't know, but the flag is a big plus! 🇨🇭" },
+      { q:"Why can't you trust stairs?", a:"Because they're always up to something! 🪜" },
+      // Puns & one-liners
+      { q:"What do you call a man with a seagull on his head?", a:"Cliff! 🐦" },
+      { q:"What do you call a funny mountain?", a:"Hill-arious! ⛰️" },
+      { q:"What do you call a snowman tantrum?", a:"A meltdown! ⛄" },
+      { q:"What do you call an alligator in a vest?", a:"An investigator! 🐊" },
+      { q:"What do you call a pile of cats?", a:"A meowtain! 🐱" },
+      { q:"What do you call a sheep that can sing?", a:"A baa-ritone! 🐑" },
+      { q:"What do you call a belt made of watches?", a:"A waist of time! ⌚" },
+      { q:"What do you call a number that can't sit still?", a:"A roamin' numeral! 🔢" },
+      { q:"What do you call a sad strawberry?", a:"A blueberry! 🫐" },
+      { q:"What do you call a fairy that doesn't shower?", a:"Stinker Bell! 🧚" },
+      { q:"What do you call it when it rains chickens and ducks?", a:"Fowl weather! 🐔" },
+      { q:"What do you call a happy cowboy?", a:"A jolly rancher! 🤠" },
+      { q:"What do you call a royal potato?", a:"A chip off the old block! 🥔" },
+      { q:"What do you call a fish without eyes?", a:"A fsh! 🐟" },
+      { q:"What do you call a snowman with a tan?", a:"A puddle! 💧" },
+      // Misc
+      { q:"Why did Noah have to punish the chickens on the ark?", a:"They were using fowl language! 🐔" },
+      { q:"What time is it when the clock strikes 13?", a:"Time to get a new clock! 🕐" },
+      { q:"Why did the kid throw butter out the window?", a:"To see a butterfly! 🦋" },
+      { q:"What has four wheels and flies?", a:"A rubbish truck! 🚛" },
+      { q:"Why was the broom late?", a:"It swept in! 🧹" },
+      { q:"Why did the football team go to the bank?", a:"To get their quarterback! 🏈" },
+      { q:"What starts with E, ends with E, and has only one letter in it?", a:"An envelope! ✉️" },
+      { q:"What did one wall say to the other wall?", a:"I'll meet you at the corner! 🧱" },
+      { q:"I asked my dog what two minus two is.", a:"He said nothing! 🐶" },
+      { q:"Why did the kid put sugar under his pillow?", a:"So he could have sweet dreams! 🛏️" },
+      { q:"Why do seagulls fly over the sea?", a:"Because if they flew over the bay, they'd be bagels! 🥯" },
+      { q:"What do you call a factory that makes okay products?", a:"A satisfactory! 🏭" },
+      { q:"What do you call a grumpy snowman?", a:"A snowflake! ❄️" },
+      { q:"What gets wetter the more it dries?", a:"A towel! 🏊" },
+      { q:"What did the big flower say to the little flower?", a:"Hey there, bud! 🌸" },
+      { q:"What do you call a bee that's always complaining?", a:"A grumble-bee! 🐝" },
+      { q:"What do you call a sleeping bull?", a:"A bull-dozer! 🐂" },
+      { q:"Why did the golfer bring extra pants?", a:"In case he got a hole in one! ⛳" },
+      { q:"What do you call a stolen yam?", a:"A hot potato! 🥔" },
+      { q:"What do you call a rubber duck that's a detective?", a:"A quack investigator! 🦆" },
+    ];
+
+    let jokeQueue = [];
+    let jokeQueueIdx = 0;
+
+    function shuffleJokeQueue() {
+      jokeQueue = [...Array(JOKES.length).keys()];
+      for (let i = jokeQueue.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [jokeQueue[i], jokeQueue[j]] = [jokeQueue[j], jokeQueue[i]];
+      }
+      jokeQueueIdx = 0;
+    }
+
+    function openJoke() {
+      if (jokeQueue.length === 0) shuffleJokeQueue();
+      displayJoke();
+      document.getElementById('joke-overlay').classList.add('open');
+    }
+
+    function closeJoke() {
+      document.getElementById('joke-overlay').classList.remove('open');
+    }
+
+    function nextJoke() {
+      jokeQueueIdx++;
+      if (jokeQueueIdx >= jokeQueue.length) shuffleJokeQueue();
+      displayJoke();
+    }
+
+    function displayJoke() {
+      const joke = JOKES[jokeQueue[jokeQueueIdx]];
+      document.getElementById('joke-setup').textContent = joke.q;
+      document.getElementById('joke-punchline').textContent = joke.a;
+      document.getElementById('joke-counter').textContent =
+        `Joke ${jokeQueueIdx + 1} of ${JOKES.length}`;
     }
 
     // ─── INIT ────────────────────────────────────────────────────────────────
