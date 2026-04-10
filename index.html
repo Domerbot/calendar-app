@@ -1253,6 +1253,8 @@
   <script>
     // ─── CONFIG ──────────────────────────────────────────────────────────────
 
+    const API_BASE = 'http://127.0.0.1:8000';
+
     const PEOPLE = ['Mark', 'Julie', 'Ryan', 'Noah'];
     const INITIALS = { Mark:'M', Julie:'J', Ryan:'R', Noah:'N' };
     const PERSON_COLORS = { Mark:'#4299e1', Julie:'#ed64a6', Ryan:'#48bb78', Noah:'#ed8936' };
@@ -1332,6 +1334,8 @@
     let editingId = null;
     let activeCategoryPicker = null;
     let recurringEnabled = false;
+    let isLoading = false;
+    let apiError = false;
 
     // ─── QUICK SELECT NAMES ──────────────────────────────────────────────────
     const QS_DEFAULT_NAMES = [
@@ -1380,12 +1384,20 @@
       document.getElementById('qs-suggestions').innerHTML = '';
     }
 
-    function loadEvents() {
-      const raw = localStorage.getItem('humariri-events');
-      events = raw ? JSON.parse(raw) : [...DEFAULT_EVENTS];
-    }
-    function saveEvents() {
-      localStorage.setItem('humariri-events', JSON.stringify(events));
+    async function loadEvents() {
+      isLoading = true;
+      apiError = false;
+      renderAll();
+      try {
+        const res = await fetch(`${API_BASE}/events`);
+        if (!res.ok) throw new Error('Server error');
+        events = await res.json();
+      } catch (e) {
+        apiError = true;
+      } finally {
+        isLoading = false;
+        renderAll();
+      }
     }
 
     // ─── RENDER EVENTS ───────────────────────────────────────────────────────
@@ -1403,6 +1415,8 @@
 
     function renderList(id, evts, showDate) {
       const el = document.getElementById(id);
+      if (isLoading) { el.innerHTML = '<div class="empty-state">Loading…</div>'; return; }
+      if (apiError)  { el.innerHTML = '<div class="empty-state" style="color:#ef4444">Could not reach server — is the backend running?</div>'; return; }
       if (!evts.length) { el.innerHTML = '<div class="empty-state">No events</div>'; return; }
       el.innerHTML = [...evts]
         .sort((a,b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime))
@@ -1636,7 +1650,7 @@
 
     // ─── ADD EVENT ───────────────────────────────────────────────────────────
 
-    function submitEvent() {
+    async function submitEvent() {
       const name = document.getElementById('f-name').value.trim();
       const date = document.getElementById('f-date').value;
       if (!name || !date) { alert('Please enter an event name and date.'); return; }
@@ -1651,24 +1665,44 @@
         reminder:  formReminder,
       };
 
-      if (editingId != null) {
-        const idx = events.findIndex(e => e.id === editingId);
-        if (idx !== -1) events[idx] = { ...events[idx], ...fields };
-        editingId = null;
-      } else if (recurringEnabled) {
-        const freq = document.getElementById('r-freq').value;
-        const dur  = parseInt(document.getElementById('r-dur').value);
-        const newEvs = generateRecurringEvents(fields, freq, dur);
-        newEvs.forEach(ev => { events.push(ev); scheduleReminder(ev); });
-      } else {
-        const ev = { id: Date.now(), ...fields };
-        events.push(ev);
-        scheduleReminder(ev);
+      const isRecurring = recurringEnabled && editingId == null;
+      const recurFreq   = isRecurring ? document.getElementById('r-freq').value : null;
+      const recurDur    = isRecurring ? parseInt(document.getElementById('r-dur').value) : null;
+      const currentEditId = editingId;
+      editingId = null;
+      closeModal();
+
+      try {
+        if (currentEditId != null) {
+          await fetch(`${API_BASE}/events/${currentEditId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(fields),
+          });
+        } else if (isRecurring) {
+          const evs = generateRecurringEvents(fields, recurFreq, recurDur);
+          for (const ev of evs) {
+            const { id, recurringGroupId, ...body } = ev;
+            const res = await fetch(`${API_BASE}/events`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(body),
+            });
+            if (res.ok) scheduleReminder(await res.json());
+          }
+        } else {
+          const res = await fetch(`${API_BASE}/events`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(fields),
+          });
+          if (res.ok) scheduleReminder(await res.json());
+        }
+      } catch (e) {
+        showBanner('Could not save event — is the server running?');
       }
 
-      saveEvents();
-      renderAll();
-      closeModal();
+      await loadEvents();
     }
 
     // ─── NOTIFICATIONS ───────────────────────────────────────────────────────
@@ -1767,11 +1801,18 @@
       document.getElementById('confirm-overlay').classList.remove('open');
     }
 
-    function executeDelete() {
-      events = events.filter(e => !selectedIds.has(e.id));
-      saveEvents();
+    async function executeDelete() {
+      const ids = [...selectedIds];
       hideConfirm();
       exitDeleteMode();
+      try {
+        await Promise.all(ids.map(id =>
+          fetch(`${API_BASE}/events/${id}`, { method: 'DELETE' })
+        ));
+      } catch (e) {
+        showBanner('Could not delete — is the server running?');
+      }
+      await loadEvents();
     }
 
     // ─── INLINE CATEGORY PICKER ──────────────────────────────────────────────
@@ -1781,13 +1822,21 @@
       renderAll();
     }
 
-    function setCatForEvent(eventId, category) {
+    async function setCatForEvent(eventId, category) {
       const ev = events.find(e => e.id === eventId);
       if (!ev) return;
-      ev.category = category;
       activeCategoryPicker = null;
-      saveEvents();
       renderAll();
+      try {
+        await fetch(`${API_BASE}/events/${eventId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...ev, category }),
+        });
+      } catch (e) {
+        showBanner('Could not update — is the server running?');
+      }
+      await loadEvents();
     }
 
     // Close picker when tapping anywhere else on the page
@@ -1800,18 +1849,23 @@
 
     // ─── INLINE PEOPLE TOGGLE ────────────────────────────────────────────────
 
-    function toggleEventPerson(eventId, personName) {
+    async function toggleEventPerson(eventId, personName) {
       if (deleteMode) return;
       const ev = events.find(e => e.id === eventId);
       if (!ev) return;
-      if (!ev.people) ev.people = [];
-      if (ev.people.includes(personName)) {
-        ev.people = ev.people.filter(p => p !== personName);
-      } else {
-        ev.people = [...ev.people, personName];
+      const people = (ev.people || []).includes(personName)
+        ? ev.people.filter(p => p !== personName)
+        : [...(ev.people || []), personName];
+      try {
+        await fetch(`${API_BASE}/events/${eventId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...ev, people }),
+        });
+      } catch (e) {
+        showBanner('Could not update — is the server running?');
       }
-      saveEvents();
-      renderAll();
+      await loadEvents();
     }
 
     // ─── JOKES ───────────────────────────────────────────────────────────────
@@ -1966,15 +2020,16 @@
     // ─── INIT ────────────────────────────────────────────────────────────────
 
     renderToday();
-    loadEvents();
-    renderAll();
     updateCountdown();
     setInterval(updateCountdown, 1000);
     updateCatDot();
     renderFormPeople();
     renderFormReminders();
     requestNotifPermission();
-    events.forEach(scheduleReminder);
+    (async () => {
+      await loadEvents();
+      events.forEach(scheduleReminder);
+    })();
   </script>
 
 </body>
