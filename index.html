@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Humariri Calendar</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f0f4f8;
+      color: #1a202c;
+      min-height: 100vh;
+    }
+
+    header {
+      position: relative;
+      background: url('https://images.unsplash.com/photo-1562883676-8c7feb83f09b?w=1200') center center / cover no-repeat;
+      color: white;
+      padding: 24px 20px 20px;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(79,70,229,0.65), rgba(124,58,237,0.65));
+    }
+
+    header h1,
+    header p {
+      position: relative;
+      z-index: 1;
+      text-shadow: 0 1px 6px rgba(0,0,0,0.4);
+    }
+
+    header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    header p {
+      font-size: 0.85rem;
+      opacity: 0.8;
+      margin-top: 4px;
+    }
+
+    main {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+
+    .card-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #718096;
+      margin-bottom: 12px;
+    }
+
+    /* Today section */
+    .today-date {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #4f46e5;
+      line-height: 1.1;
+    }
+
+    .today-day {
+      font-size: 1rem;
+      color: #718096;
+      margin-top: 4px;
+    }
+
+    /* Events section */
+    .event-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .event-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .event-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+
+    .event-info {
+      flex: 1;
+    }
+
+    .event-name {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #1a202c;
+    }
+
+    .event-date {
+      font-size: 0.8rem;
+      color: #a0aec0;
+      margin-top: 2px;
+    }
+
+    .event-tag {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+
+    /* Countdown section */
+    .countdown-grid {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .countdown-box {
+      flex: 1;
+      background: #f7f3ff;
+      border-radius: 12px;
+      padding: 14px 8px;
+      text-align: center;
+    }
+
+    .countdown-number {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #7c3aed;
+      line-height: 1;
+    }
+
+    .countdown-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #9f7aea;
+      margin-top: 4px;
+    }
+
+    .countdown-event-name {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #718096;
+      margin-top: 12px;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid #e2e8f0;
+      margin: 4px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Humariri Calendar</h1>
+    <p>Family events & countdowns</p>
+  </header>
+
+  <main>
+
+    <!-- Today -->
+    <div class="card">
+      <div class="card-title">Today</div>
+      <div class="today-date" id="today-date">—</div>
+      <div class="today-day" id="today-day">—</div>
+    </div>
+
+    <!-- Upcoming Events -->
+    <div class="card">
+      <div class="card-title">Upcoming Events</div>
+      <div class="event-list">
+
+        <div class="event-item">
+          <div class="event-dot" style="background:#f6ad55;"></div>
+          <div class="event-info">
+            <div class="event-name">School Sports Day</div>
+            <div class="event-date">Saturday, 19 Apr 2026</div>
+          </div>
+          <span class="event-tag" style="background:#fffbeb;color:#d97706;">School</span>
+        </div>
+
+        <hr class="divider" />
+
+        <div class="event-item">
+          <div class="event-dot" style="background:#68d391;"></div>
+          <div class="event-info">
+            <div class="event-name">Family Picnic</div>
+            <div class="event-date">Sunday, 27 Apr 2026</div>
+          </div>
+          <span class="event-tag" style="background:#f0fff4;color:#276749;">Family</span>
+        </div>
+
+        <hr class="divider" />
+
+        <div class="event-item">
+          <div class="event-dot" style="background:#76e4f7;"></div>
+          <div class="event-info">
+            <div class="event-name">Doctor Appointment</div>
+            <div class="event-date">Wednesday, 7 May 2026</div>
+          </div>
+          <span class="event-tag" style="background:#e6fffa;color:#2c7a7b;">Health</span>
+        </div>
+
+        <hr class="divider" />
+
+        <div class="event-item">
+          <div class="event-dot" style="background:#f687b3;"></div>
+          <div class="event-info">
+            <div class="event-name">Birthday Party</div>
+            <div class="event-date">Saturday, 24 May 2026</div>
+          </div>
+          <span class="event-tag" style="background:#fff5f7;color:#97266d;">Birthday</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Countdown -->
+    <div class="card">
+      <div class="card-title">Countdown</div>
+      <div class="countdown-grid">
+        <div class="countdown-box">
+          <div class="countdown-number" id="cd-days">—</div>
+          <div class="countdown-label">Days</div>
+        </div>
+        <div class="countdown-box">
+          <div class="countdown-number" id="cd-hours">—</div>
+          <div class="countdown-label">Hours</div>
+        </div>
+        <div class="countdown-box">
+          <div class="countdown-number" id="cd-minutes">—</div>
+          <div class="countdown-label">Minutes</div>
+        </div>
+      </div>
+      <div class="countdown-event-name">until <strong>Departure to Spain</strong> — 1 Jul 2026</div>
+    </div>
+
+  </main>
+
+  <script>
+    // --- Today's date ---
+    const now = new Date();
+    const dateOpts = { day: 'numeric', month: 'long', year: 'numeric' };
+    const dayOpts  = { weekday: 'long' };
+    document.getElementById('today-date').textContent = now.toLocaleDateString('en-GB', dateOpts);
+    document.getElementById('today-day').textContent  = now.toLocaleDateString('en-GB', dayOpts);
+
+    // --- Countdown to key date ---
+    const TARGET = new Date('2026-07-01T00:00:00');
+
+    function updateCountdown() {
+      const diff = TARGET - new Date();
+      if (diff <= 0) {
+        document.getElementById('cd-days').textContent    = '0';
+        document.getElementById('cd-hours').textContent   = '0';
+        document.getElementById('cd-minutes').textContent = '0';
+        return;
+      }
+      const days    = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours   = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      document.getElementById('cd-days').textContent    = days;
+      document.getElementById('cd-hours').textContent   = hours;
+      document.getElementById('cd-minutes').textContent = minutes;
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 30000);
+  </script>
+
+</body>
+</html>
