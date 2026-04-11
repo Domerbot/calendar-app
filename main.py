@@ -71,9 +71,18 @@ def init_db():
             endTime   TEXT    NOT NULL,
             category  TEXT    NOT NULL,
             people    TEXT    NOT NULL DEFAULT '[]',
-            reminder  TEXT    NOT NULL DEFAULT ''
+            reminder  TEXT    NOT NULL DEFAULT '',
+            endDate   TEXT    NOT NULL DEFAULT ''
         )
     """)
+    # Migrate existing databases that predate the endDate column
+    try:
+        if DATABASE_URL:
+            cur.execute("ALTER TABLE events ADD COLUMN IF NOT EXISTS endDate TEXT NOT NULL DEFAULT ''")
+        else:
+            cur.execute("ALTER TABLE events ADD COLUMN endDate TEXT NOT NULL DEFAULT ''")
+    except Exception:
+        pass  # Column already exists (SQLite raises on duplicate ADD COLUMN)
     conn.commit()
     conn.close()
 
@@ -128,6 +137,7 @@ class EventIn(BaseModel):
     category: str
     people: list[str] = []
     reminder: str = ""
+    endDate: str = ""
 
 
 class Event(EventIn):
@@ -175,6 +185,8 @@ def row_to_event(row) -> dict:
         d["startTime"] = d.pop("starttime")
     if "endtime" in d:
         d["endTime"] = d.pop("endtime")
+    if "enddate" in d:
+        d["endDate"] = d.pop("enddate")
     return d
 
 
@@ -257,19 +269,19 @@ def create_event(event: EventIn, _: dict = Depends(get_current_user)):
     cur = conn.cursor()
     params = (
         event.name, event.date, event.startTime, event.endTime,
-        event.category, json.dumps(event.people), event.reminder,
+        event.category, json.dumps(event.people), event.reminder, event.endDate,
     )
     if DATABASE_URL:
         cur.execute(
-            "INSERT INTO events (name, date, startTime, endTime, category, people, reminder) "
-            "VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id",
+            "INSERT INTO events (name, date, startTime, endTime, category, people, reminder, endDate) "
+            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id",
             params,
         )
         new_id = cur.fetchone()["id"]  # type: ignore[index]
     else:
         cur.execute(
-            "INSERT INTO events (name, date, startTime, endTime, category, people, reminder) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO events (name, date, startTime, endTime, category, people, reminder, endDate) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
             params,
         )
         new_id = cur.lastrowid or 0
@@ -286,9 +298,9 @@ def update_event(event_id: int, event: EventIn, _: dict = Depends(get_current_us
     cur = conn.cursor()
     cur.execute(
         f"UPDATE events SET name={PH}, date={PH}, startTime={PH}, endTime={PH}, "
-        f"category={PH}, people={PH}, reminder={PH} WHERE id={PH}",
+        f"category={PH}, people={PH}, reminder={PH}, endDate={PH} WHERE id={PH}",
         (event.name, event.date, event.startTime, event.endTime,
-         event.category, json.dumps(event.people), event.reminder, event_id),
+         event.category, json.dumps(event.people), event.reminder, event.endDate, event_id),
     )
     conn.commit()
     if cur.rowcount == 0:

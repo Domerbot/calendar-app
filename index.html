@@ -1288,6 +1288,70 @@
       color: #c53030;
     }
 
+    /* ===== WEEK VIEW NAVIGATION ===== */
+    .week-nav-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      gap: 8px;
+    }
+    .week-nav-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 1.5px solid #e2e8f0;
+      background: white;
+      font-size: 1.15rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.12s;
+      color: #4a5568;
+      font-family: inherit;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+    .week-nav-btn:active { background: #f0f4f8; transform: scale(0.91); }
+    .week-nav-label {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #2d3748;
+      text-align: center;
+      flex: 1;
+    }
+
+    /* ===== DELETE CONFIRM (inline in modal) ===== */
+    .modal-dc-box {
+      background: #fff5f5;
+      border: 1.5px solid #fca5a5;
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-top: 10px;
+    }
+    .modal-dc-text {
+      font-size: 0.83rem;
+      color: #742a2a;
+      margin-bottom: 12px;
+      line-height: 1.5;
+      text-align: center;
+    }
+    .modal-dc-actions { display: flex; gap: 8px; }
+    .modal-dc-cancel {
+      flex: 1; padding: 11px; border-radius: 10px;
+      border: 1.5px solid #e2e8f0; background: white; color: #4a5568;
+      font-size: 0.88rem; font-weight: 600; cursor: pointer; font-family: inherit;
+    }
+    .modal-dc-cancel:active { background: #f7fafc; }
+    .modal-dc-go {
+      flex: 1; padding: 11px; border-radius: 10px;
+      border: none; background: #ef4444; color: white;
+      font-size: 0.88rem; font-weight: 700; cursor: pointer; font-family: inherit;
+    }
+    .modal-dc-go:active { opacity: 0.88; }
+    .btn-danger.hidden-for-confirm { display: none !important; }
+
     /* ===== AUTH SCREEN ===== */
     .auth-screen {
       position: fixed;
@@ -1449,6 +1513,11 @@
 
     <!-- Week grid (hidden by default) -->
     <div class="card week-grid-card" id="week-grid-card" style="display:none">
+      <div class="week-nav-bar">
+        <button class="week-nav-btn" onclick="shiftWeek(-1)" title="Previous week">&#8592;</button>
+        <span class="week-nav-label" id="week-nav-label"></span>
+        <button class="week-nav-btn" onclick="shiftWeek(1)" title="Next week">&#8594;</button>
+      </div>
       <div class="week-grid" id="week-grid"></div>
     </div>
 
@@ -1594,6 +1663,12 @@
         <div class="date-day-hint" id="f-date-day"></div>
       </div>
 
+      <div class="form-group">
+        <label class="form-label">End Date <span style="color:#a0aec0;font-weight:400;text-transform:none;letter-spacing:0">(optional — for multi-day events)</span></label>
+        <input class="form-input" id="f-enddate" type="date" oninput="updateEndDateDayLabel()" onchange="updateEndDateDayLabel()" />
+        <div class="date-day-hint" id="f-enddate-day"></div>
+      </div>
+
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Start Time</label>
@@ -1667,6 +1742,17 @@
 
       <button class="btn-primary" id="modal-submit-btn" onclick="submitEvent()">Add Event</button>
       <button class="btn-danger" id="modal-delete-btn" onclick="deleteFromModal()">&#128465; Delete Event</button>
+
+      <!-- Inline confirmation — shown when delete button is tapped -->
+      <div id="modal-delete-confirm" style="display:none">
+        <div class="modal-dc-box">
+          <p class="modal-dc-text">Delete this event? This cannot be undone.</p>
+          <div class="modal-dc-actions">
+            <button class="modal-dc-cancel" onclick="cancelModalDelete()">Keep</button>
+            <button class="modal-dc-go" onclick="executeModalDelete()">Delete</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1862,7 +1948,14 @@
 
     // ─── DATE HELPERS ─────────────────────────────────────────────────────────
 
-    const toStr = d => d.toISOString().split('T')[0];
+    // Use local date parts (not UTC) to avoid midnight timezone shifts
+    const toStr = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+
+    // Return the date string for the day after the given date string
+    function nextDay(dateStr) {
+      const [y, m, d] = dateStr.split('-').map(Number);
+      return toStr(new Date(y, m - 1, d + 1));
+    }
 
     function todayStr() { return toStr(new Date()); }
 
@@ -1921,6 +2014,7 @@
     let isLoading = false;
     let apiError = false;
     let endTimeManuallySet = false;
+    let weekOffset = 0;  // 0 = current week; ±N = N weeks forward/back
 
     // ─── QUICK SELECT NAMES ──────────────────────────────────────────────────
     const QS_DEFAULT_NAMES = [
@@ -1989,13 +2083,19 @@
     // ─── RENDER EVENTS ───────────────────────────────────────────────────────
 
     function renderAll() {
-      const today  = todayStr();
-      const wkEnd  = weekEndStr();
-      const upEnd  = upcomingEndStr();
+      const today   = todayStr();
+      const wkEnd   = weekEndStr();
+      const upEnd   = upcomingEndStr();
+      const tmr     = nextDay(today);       // start of "this week" window
+      const postWk  = nextDay(wkEnd);       // start of "upcoming" window
 
-      renderList('list-today',    events.filter(e => e.date === today),                  false);
-      renderList('list-week',     events.filter(e => e.date > today && e.date <= wkEnd), true);
-      renderList('list-upcoming', events.filter(e => e.date > wkEnd  && e.date <= upEnd), true);
+      // For multi-day events, use endDate if set; otherwise the event is single-day
+      const eEnd = e => (e.endDate && e.endDate > e.date) ? e.endDate : e.date;
+
+      // An event falls in a section if its [date, eEnd] range overlaps the section's window
+      renderList('list-today',    events.filter(e => e.date <= today  && eEnd(e) >= today),  false);
+      renderList('list-week',     events.filter(e => e.date <= wkEnd  && eEnd(e) >= tmr),    true);
+      renderList('list-upcoming', events.filter(e => e.date <= upEnd  && eEnd(e) >= postWk), true);
       renderStats();
       if (currentView === 'week') renderWeekView();
     }
@@ -2043,7 +2143,12 @@
             <div class="event-body">
               <div class="event-name${!deleteMode?' tappable':''}" ${nameClick}>${esc(e.name)}</div>
               ${time ? `<div class="event-time">${time}</div>` : ''}
-              ${showDate ? `<div class="event-date-label">${fmtDate(e.date)}</div>` : ''}
+              ${(() => {
+                const isMultiDay = e.endDate && e.endDate !== e.date;
+                if (isMultiDay) return `<div class="event-date-label">${fmtDate(e.date)} → ${fmtDate(e.endDate)}</div>`;
+                if (showDate)   return `<div class="event-date-label">${fmtDate(e.date)}</div>`;
+                return '';
+              })()}
               ${rl ? `<div class="event-reminder">&#128276; ${rl}</div>` : ''}
             </div>
             <div class="event-right">
@@ -2205,8 +2310,15 @@
       const el  = document.getElementById('f-date-day');
       if (!val) { el.textContent = ''; return; }
       const [y,m,d] = val.split('-').map(Number);
-      const day = new Date(y, m-1, d).toLocaleDateString('en-GB', { weekday:'long' });
-      el.textContent = day;
+      el.textContent = new Date(y, m-1, d).toLocaleDateString('en-GB', { weekday:'long' });
+    }
+
+    function updateEndDateDayLabel() {
+      const val = document.getElementById('f-enddate').value;
+      const el  = document.getElementById('f-enddate-day');
+      if (!val) { el.textContent = ''; return; }
+      const [y,m,d] = val.split('-').map(Number);
+      el.textContent = new Date(y, m-1, d).toLocaleDateString('en-GB', { weekday:'long' });
     }
 
     // ─── MODAL ────────────────────────────────────────────────────────────────
@@ -2215,10 +2327,12 @@
       editingId = id;
       const ev = id != null ? events.find(e => e.id === id) : null;
 
-      document.getElementById('f-name').value = ev ? ev.name     : '';
-      document.getElementById('f-date').value = ev ? ev.date     : todayStr();
-      document.getElementById('f-cat').value  = ev ? ev.category : 'family';
+      document.getElementById('f-name').value    = ev ? ev.name         : '';
+      document.getElementById('f-date').value    = ev ? ev.date         : todayStr();
+      document.getElementById('f-enddate').value = ev ? (ev.endDate || '') : '';
+      document.getElementById('f-cat').value     = ev ? ev.category     : 'family';
       updateCatDot();
+      updateEndDateDayLabel();
       updateDateDayLabel();
 
       endTimeManuallySet = false;
@@ -2236,6 +2350,8 @@
       document.getElementById('modal-title').textContent      = isEdit ? 'Edit Event'   : 'Add Event';
       document.getElementById('modal-submit-btn').textContent = isEdit ? 'Save Changes' : 'Add Event';
       document.getElementById('modal-delete-btn').classList.toggle('visible', isEdit);
+      document.getElementById('modal-delete-btn').classList.remove('hidden-for-confirm');
+      document.getElementById('modal-delete-confirm').style.display = 'none';
 
       document.getElementById('qs-suggestions').innerHTML = '';
 
@@ -2249,7 +2365,18 @@
 
     // ─── DELETE FROM MODAL ───────────────────────────────────────────────────
 
-    async function deleteFromModal() {
+    function deleteFromModal() {
+      // Show inline confirmation rather than deleting immediately
+      document.getElementById('modal-delete-btn').classList.add('hidden-for-confirm');
+      document.getElementById('modal-delete-confirm').style.display = '';
+    }
+
+    function cancelModalDelete() {
+      document.getElementById('modal-delete-btn').classList.remove('hidden-for-confirm');
+      document.getElementById('modal-delete-confirm').style.display = 'none';
+    }
+
+    async function executeModalDelete() {
       if (editingId == null) return;
       const id = editingId;
       closeModal();
@@ -2313,6 +2440,7 @@
         category:  document.getElementById('f-cat').value,
         people:    [...formPeople],
         reminder:  formReminder,
+        endDate:   document.getElementById('f-enddate').value || '',
       };
 
       const isRecurring = recurringEnabled && editingId == null;
@@ -2706,16 +2834,28 @@
       if (isWeek) renderWeekView();
     }
 
-    function renderWeekView() {
-      const grid  = document.getElementById('week-grid');
-      const today = new Date(); today.setHours(0,0,0,0);
-      const now = new Date();
-      const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+    function shiftWeek(delta) {
+      weekOffset += delta;
+      renderWeekView();
+    }
 
-      // Find Monday of current week
-      const dow = today.getDay(); // 0=Sun
-      const monday = new Date(today);
-      monday.setDate(today.getDate() - (dow === 0 ? 6 : dow - 1));
+    function renderWeekView() {
+      const grid = document.getElementById('week-grid');
+      const now  = new Date(); now.setHours(0,0,0,0);
+      const todayDateStr = toStr(now);
+
+      // Find Monday of the displayed week, applying weekOffset
+      const dow    = now.getDay(); // 0=Sun
+      const monday = new Date(now);
+      monday.setDate(now.getDate() - (dow === 0 ? 6 : dow - 1) + weekOffset * 7);
+
+      // Update the navigation label with the week's date range
+      const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
+      const sameMonth = monday.getMonth() === sunday.getMonth();
+      const navLabel = sameMonth
+        ? `${monday.getDate()}–${sunday.getDate()} ${sunday.toLocaleDateString('en-GB', { month: 'short' })}`
+        : `${monday.getDate()} ${monday.toLocaleDateString('en-GB', { month: 'short' })} – ${sunday.getDate()} ${sunday.toLocaleDateString('en-GB', { month: 'short' })}`;
+      document.getElementById('week-nav-label').textContent = navLabel;
 
       const localStr = d =>
         `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -2725,11 +2865,12 @@
         const d = new Date(monday);
         d.setDate(monday.getDate() + i);
         const ds = localStr(d);
+        const eEnd = e => (e.endDate && e.endDate > e.date) ? e.endDate : e.date;
         const dayEvents = [...events]
-          .filter(e => e.date === ds)
+          .filter(e => e.date <= ds && eEnd(e) >= ds)
           .sort((a,b) => a.startTime.localeCompare(b.startTime));
 
-        const isToday = ds === todayStr;
+        const isToday = ds === todayDateStr;
         const dayName = d.toLocaleDateString('en-GB', { weekday:'short' });
         const dayNum  = d.getDate();
 
