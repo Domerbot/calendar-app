@@ -1146,6 +1146,7 @@
       display: grid;
       grid-template-columns: repeat(7, 1fr);
       gap: 3px;
+      margin-top: 4px;
     }
     .week-col { display: flex; flex-direction: column; align-items: stretch; min-height: 180px; }
     .week-col-header { text-align: center; margin-bottom: 5px; }
@@ -1321,6 +1322,65 @@
       text-align: center;
       flex: 1;
     }
+
+    /* ===== WEEK VIEW BANNERS (multi-day events) ===== */
+    .week-banners-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 2px 3px;
+      margin-bottom: 6px;
+    }
+    .week-banner {
+      height: 17px;
+      border-radius: 3px;
+      border-left: 3px solid;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      padding: 0 4px;
+      cursor: pointer;
+      overflow: hidden;
+      transition: opacity 0.1s;
+    }
+    .week-banner:active { opacity: 0.7; }
+    .week-banner-name {
+      font-size: 0.5rem;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      letter-spacing: 0.1px;
+    }
+
+    /* ===== MULTI-DAY TYPE TOGGLE (in form) ===== */
+    .multiday-type-section {
+      margin-top: -4px;
+      margin-bottom: 6px;
+    }
+    .multiday-type-toggle {
+      display: flex;
+      gap: 6px;
+    }
+    .multiday-type-btn {
+      flex: 1;
+      padding: 9px 6px;
+      border-radius: 10px;
+      border: 1.5px solid #e2e8f0;
+      background: white;
+      color: #718096;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.12s;
+      text-align: center;
+    }
+    .multiday-type-btn.active {
+      background: #eef2ff;
+      border-color: #4f46e5;
+      color: #4f46e5;
+    }
+    .multiday-type-btn:active { opacity: 0.75; }
 
     /* ===== DELETE CONFIRM (inline in modal) ===== */
     .modal-dc-box {
@@ -1518,7 +1578,7 @@
         <span class="week-nav-label" id="week-nav-label"></span>
         <button class="week-nav-btn" onclick="shiftWeek(1)" title="Next week">&#8594;</button>
       </div>
-      <div class="week-grid" id="week-grid"></div>
+      <div id="week-grid"></div>
     </div>
 
     <!-- This Week's Events -->
@@ -1669,7 +1729,14 @@
         <div class="date-day-hint" id="f-enddate-day"></div>
       </div>
 
-      <div class="form-row">
+      <div class="multiday-type-section" id="multiday-type-section" style="display:none">
+        <div class="multiday-type-toggle">
+          <button class="multiday-type-btn active" id="type-away" onclick="setMultiDayType('away')">Away (no times)</button>
+          <button class="multiday-type-btn" id="type-pickup" onclick="setMultiDayType('pickup')">Drop-off / pick-up times</button>
+        </div>
+      </div>
+
+      <div class="form-row" id="time-row">
         <div class="form-group">
           <label class="form-label">Start Time</label>
           <select class="time-select" id="f-start" onchange="autoSetEndTime()"></select>
@@ -2015,6 +2082,7 @@
     let apiError = false;
     let endTimeManuallySet = false;
     let weekOffset = 0;  // 0 = current week; ±N = N weeks forward/back
+    let multiDayType = 'away'; // 'away' | 'pickup'
 
     // ─── QUICK SELECT NAMES ──────────────────────────────────────────────────
     const QS_DEFAULT_NAMES = [
@@ -2114,9 +2182,13 @@
     function eventHTML(e, showDate) {
       const cat = CATS[e.category] || CATS.general;
 
-      const time = (e.startTime && e.endTime)
-        ? `${fmtTime(e.startTime)} – ${fmtTime(e.endTime)}`
-        : e.startTime ? fmtTime(e.startTime) : '';
+      const isMultiDay = e.endDate && e.endDate > e.date;
+      const isAway     = isMultiDay && (!e.startTime || e.startTime === '');
+
+      const time = isAway ? '' :
+        (e.startTime && e.endTime)
+          ? `${fmtTime(e.startTime)} – ${fmtTime(e.endTime)}`
+          : e.startTime ? fmtTime(e.startTime) : '';
 
       const avatars = PEOPLE.map(p => {
         const active = e.people?.includes(p);
@@ -2144,8 +2216,11 @@
               <div class="event-name${!deleteMode?' tappable':''}" ${nameClick}>${esc(e.name)}</div>
               ${time ? `<div class="event-time">${time}</div>` : ''}
               ${(() => {
-                const isMultiDay = e.endDate && e.endDate !== e.date;
-                if (isMultiDay) return `<div class="event-date-label">${fmtDate(e.date)} → ${fmtDate(e.endDate)}</div>`;
+                if (isAway) {
+                  const dayCount = Math.round((new Date(e.endDate + 'T00:00:00') - new Date(e.date + 'T00:00:00')) / 86400000) + 1;
+                  return `<div class="event-date-label">📅 ${fmtDate(e.date)} → ${fmtDate(e.endDate)} · ${dayCount} day${dayCount !== 1 ? 's' : ''}</div>`;
+                }
+                if (isMultiDay) return `<div class="event-date-label">📅 ${fmtDate(e.date)} ${fmtTime(e.startTime)} → ${fmtDate(e.endDate)} ${fmtTime(e.endTime)}</div>`;
                 if (showDate)   return `<div class="event-date-label">${fmtDate(e.date)}</div>`;
                 return '';
               })()}
@@ -2314,11 +2389,25 @@
     }
 
     function updateEndDateDayLabel() {
-      const val = document.getElementById('f-enddate').value;
-      const el  = document.getElementById('f-enddate-day');
-      if (!val) { el.textContent = ''; return; }
-      const [y,m,d] = val.split('-').map(Number);
-      el.textContent = new Date(y, m-1, d).toLocaleDateString('en-GB', { weekday:'long' });
+      const val     = document.getElementById('f-enddate').value;
+      const dateVal = document.getElementById('f-date').value;
+      const el      = document.getElementById('f-enddate-day');
+      if (!val) { el.textContent = ''; }
+      else {
+        const [y,m,d] = val.split('-').map(Number);
+        el.textContent = new Date(y, m-1, d).toLocaleDateString('en-GB', { weekday:'long' });
+      }
+      // Show type toggle only when endDate is after date
+      const isMultiDay = val && dateVal && val > dateVal;
+      document.getElementById('multiday-type-section').style.display = isMultiDay ? '' : 'none';
+      document.getElementById('time-row').style.display = (isMultiDay && multiDayType === 'away') ? 'none' : '';
+    }
+
+    function setMultiDayType(type) {
+      multiDayType = type;
+      document.getElementById('type-away').classList.toggle('active', type === 'away');
+      document.getElementById('type-pickup').classList.toggle('active', type === 'pickup');
+      document.getElementById('time-row').style.display = type === 'away' ? 'none' : '';
     }
 
     // ─── MODAL ────────────────────────────────────────────────────────────────
@@ -2332,12 +2421,22 @@
       document.getElementById('f-enddate').value = ev ? (ev.endDate || '') : '';
       document.getElementById('f-cat').value     = ev ? ev.category     : 'family';
       updateCatDot();
-      updateEndDateDayLabel();
       updateDateDayLabel();
 
+      // Restore multi-day type from existing event:
+      // Away = has endDate after date AND no startTime; Pickup = has times
+      if (ev && ev.endDate && ev.endDate > ev.date) {
+        multiDayType = (!ev.startTime || ev.startTime === '') ? 'away' : 'pickup';
+      } else {
+        multiDayType = 'away';
+      }
+      document.getElementById('type-away').classList.toggle('active', multiDayType === 'away');
+      document.getElementById('type-pickup').classList.toggle('active', multiDayType === 'pickup');
+      updateEndDateDayLabel();
+
       endTimeManuallySet = false;
-      const startVal = ev ? ev.startTime : '08:00';
-      const endVal   = ev ? ev.endTime   : '09:00';
+      const startVal = ev ? (ev.startTime || '08:00') : '08:00';
+      const endVal   = ev ? (ev.endTime   || '09:00') : '09:00';
       buildTimeOptions('f-start', startVal);
       buildTimeOptions('f-end',   endVal);
 
@@ -2432,15 +2531,17 @@
       const date = document.getElementById('f-date').value;
       if (!name || !date) { alert('Please enter an event name and date.'); return; }
 
+      const endDate = document.getElementById('f-enddate').value || '';
+      const isAway  = endDate && endDate > date && multiDayType === 'away';
       const fields = {
         name,
         date,
-        startTime: document.getElementById('f-start').value,
-        endTime:   document.getElementById('f-end').value,
+        startTime: isAway ? '' : document.getElementById('f-start').value,
+        endTime:   isAway ? '' : document.getElementById('f-end').value,
         category:  document.getElementById('f-cat').value,
         people:    [...formPeople],
         reminder:  formReminder,
-        endDate:   document.getElementById('f-enddate').value || '',
+        endDate,
       };
 
       const isRecurring = recurringEnabled && editingId == null;
@@ -2860,16 +2961,83 @@
       const localStr = d =>
         `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 
+      // Build array of day date strings for this week
+      const dayStrs = [];
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(monday); d.setDate(monday.getDate() + i);
+        dayStrs.push(localStr(d));
+      }
+      const monStr = dayStrs[0];
+      const sunStr = dayStrs[6];
+
+      // Separate multi-day events from single-day events
+      const multiDayEvents = events.filter(e => e.endDate && e.endDate > e.date);
+      const singleDayEvents = events.filter(e => !e.endDate || e.endDate <= e.date);
+
+      // Build banner rows: each multi-day event that overlaps this week gets a row
+      // Each banner row is an array of 7 cells: {span, event} | null | 'cont'
+      const bannerRows = [];
+      const weekMulti = multiDayEvents.filter(e => e.date <= sunStr && e.endDate >= monStr);
+
+      for (const e of weekMulti) {
+        // sc = first column index in this week where the event starts (or 0 if started before)
+        let sc = 0;
+        for (let i = 0; i < 7; i++) { if (dayStrs[i] >= e.date) { sc = i; break; } }
+        // ec = last column index where the event still covers (or 6 if it extends beyond)
+        let ec = 6;
+        for (let i = 0; i < 7; i++) { if (dayStrs[i] > e.endDate) { ec = i - 1; break; } }
+
+        // Find a banner row where columns sc..ec are free
+        let placed = false;
+        for (const row of bannerRows) {
+          let free = true;
+          for (let i = sc; i <= ec; i++) { if (row[i] !== null) { free = false; break; } }
+          if (free) {
+            row[sc] = { event: e, span: ec - sc + 1 };
+            for (let i = sc + 1; i <= ec; i++) row[i] = 'occupied';
+            placed = true;
+            break;
+          }
+        }
+        if (!placed) {
+          const row = Array(7).fill(null);
+          row[sc] = { event: e, span: ec - sc + 1 };
+          for (let i = sc + 1; i <= ec; i++) row[i] = 'occupied';
+          bannerRows.push(row);
+        }
+      }
+
+      // Render banner grid HTML
+      let bannersHTML = '';
+      for (const row of bannerRows) {
+        bannersHTML += `<div class="week-banners-grid">`;
+        for (let i = 0; i < 7; i++) {
+          const cell = row[i];
+          if (cell === null) {
+            bannersHTML += `<div></div>`;
+          } else if (cell === 'occupied') {
+            // skip — spanned by previous cell
+          } else {
+            const e = cell.event;
+            const cat = CATS[e.category] || CATS.general;
+            const isAway = !e.startTime || e.startTime === '';
+            bannersHTML += `<div class="week-banner" style="grid-column:span ${cell.span};background:${cat.bg};border-left-color:${cat.color};color:${cat.text}" onclick="openModal(${e.id})" title="${esc(e.name)}">
+              <span class="week-banner-name">${isAway ? '✈ ' : ''}${esc(e.name)}</span>
+            </div>`;
+          }
+        }
+        bannersHTML += `</div>`;
+      }
+
+      // Render day columns (single-day events only)
       const cols = [];
       for (let i = 0; i < 7; i++) {
-        const d = new Date(monday);
-        d.setDate(monday.getDate() + i);
-        const ds = localStr(d);
-        const eEnd = e => (e.endDate && e.endDate > e.date) ? e.endDate : e.date;
-        const dayEvents = [...events]
-          .filter(e => e.date <= ds && eEnd(e) >= ds)
+        const ds = dayStrs[i];
+        const dayEvents = [...singleDayEvents]
+          .filter(e => e.date === ds)
           .sort((a,b) => a.startTime.localeCompare(b.startTime));
 
+        const d = new Date(monday); d.setDate(monday.getDate() + i);
         const isToday = ds === todayDateStr;
         const dayName = d.toLocaleDateString('en-GB', { weekday:'short' });
         const dayNum  = d.getDate();
@@ -2891,7 +3059,8 @@
             <div class="week-events">${chips}</div>
           </div>`);
       }
-      grid.innerHTML = cols.join('');
+
+      grid.innerHTML = bannersHTML + `<div class="week-grid">${cols.join('')}</div>`;
     }
 
     // ─── AI SUMMARY SHEET ────────────────────────────────────────────────────
