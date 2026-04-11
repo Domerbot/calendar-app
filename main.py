@@ -9,11 +9,16 @@ from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+import bcrypt as _bcrypt
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
 
 load_dotenv()
+
+# Workaround: passlib reads bcrypt.__about__.__version__ but bcrypt 4.x removed __about__
+if not hasattr(_bcrypt, "__about__"):
+    _bcrypt.__about__ = type("about", (), {"__version__": _bcrypt.__version__})()  # type: ignore[attr-defined]
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 DB_PATH = "calendar.db"
@@ -188,7 +193,9 @@ def signup(data: SignupIn):
         conn.close()
         raise HTTPException(status_code=409, detail="Email already registered")
 
-    password_hash = pwd_context.hash(data.password)
+    # bcrypt silently truncates at 72 bytes — do it explicitly so hashing and
+    # verification always use the same input regardless of caller behaviour
+    password_hash = pwd_context.hash(data.password.encode("utf-8")[:72])
 
     if DATABASE_URL:
         cur.execute(
@@ -224,7 +231,7 @@ def login(data: LoginIn):
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
     user = dict(row)
-    if not pwd_context.verify(data.password, user["password_hash"]):
+    if not pwd_context.verify(data.password.encode("utf-8")[:72], user["password_hash"]):
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
     return {"token": make_token(user["id"]), "user": {"id": user["id"], "name": user["name"], "email": user["email"]}}
