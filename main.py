@@ -12,10 +12,15 @@ from pydantic import BaseModel
 
 load_dotenv()
 
+DATABASE_URL = os.getenv("DATABASE_URL")
 DB_PATH = "calendar.db"
-
+PH = "%s" if DATABASE_URL else "?"  # SQL placeholder style
 
 def get_db():
+    if DATABASE_URL:
+        import psycopg2
+        import psycopg2.extras
+        return psycopg2.connect(DATABASE_URL, cursor_factory=psycopg2.extras.RealDictCursor)
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
@@ -23,9 +28,11 @@ def get_db():
 
 def init_db():
     conn = get_db()
-    conn.execute("""
+    cur = conn.cursor()
+    pk = "SERIAL PRIMARY KEY" if DATABASE_URL else "INTEGER PRIMARY KEY AUTOINCREMENT"
+    cur.execute(f"""
         CREATE TABLE IF NOT EXISTS events (
-            id        INTEGER PRIMARY KEY AUTOINCREMENT,
+            id        {pk},
             name      TEXT    NOT NULL,
             date      TEXT    NOT NULL,
             startTime TEXT    NOT NULL,
@@ -69,7 +76,7 @@ class Event(EventIn):
     id: int
 
 
-def row_to_event(row: sqlite3.Row) -> dict:
+def row_to_event(row) -> dict:
     d = dict(row)
     d["people"] = json.loads(d["people"])
     return d
@@ -78,7 +85,9 @@ def row_to_event(row: sqlite3.Row) -> dict:
 @app.get("/events", response_model=list[Event])
 def get_events():
     conn = get_db()
-    rows = conn.execute("SELECT * FROM events ORDER BY date, startTime").fetchall()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM events ORDER BY date, startTime")
+    rows = cur.fetchall()
     conn.close()
     return [row_to_event(r) for r in rows]
 
@@ -86,21 +95,28 @@ def get_events():
 @app.post("/events", response_model=Event, status_code=201)
 def create_event(event: EventIn):
     conn = get_db()
-    cursor = conn.execute(
-        "INSERT INTO events (name, date, startTime, endTime, category, people, reminder) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?)",
-        (
-            event.name,
-            event.date,
-            event.startTime,
-            event.endTime,
-            event.category,
-            json.dumps(event.people),
-            event.reminder,
-        ),
+    cur = conn.cursor()
+    params = (
+        event.name, event.date, event.startTime, event.endTime,
+        event.category, json.dumps(event.people), event.reminder,
     )
+    if DATABASE_URL:
+        cur.execute(
+            "INSERT INTO events (name, date, startTime, endTime, category, people, reminder) "
+            "VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id",
+            params,
+        )
+        new_id = cur.fetchone()["id"]
+    else:
+        cur.execute(
+            "INSERT INTO events (name, date, startTime, endTime, category, people, reminder) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?)",
+            params,
+        )
+        new_id = cur.lastrowid
     conn.commit()
-    row = conn.execute("SELECT * FROM events WHERE id = ?", (cursor.lastrowid,)).fetchone()
+    cur.execute(f"SELECT * FROM events WHERE id = {PH}", (new_id,))
+    row = cur.fetchone()
     conn.close()
     return row_to_event(row)
 
@@ -108,25 +124,19 @@ def create_event(event: EventIn):
 @app.put("/events/{event_id}", response_model=Event)
 def update_event(event_id: int, event: EventIn):
     conn = get_db()
-    result = conn.execute(
-        "UPDATE events SET name=?, date=?, startTime=?, endTime=?, category=?, people=?, reminder=? "
-        "WHERE id=?",
-        (
-            event.name,
-            event.date,
-            event.startTime,
-            event.endTime,
-            event.category,
-            json.dumps(event.people),
-            event.reminder,
-            event_id,
-        ),
+    cur = conn.cursor()
+    cur.execute(
+        f"UPDATE events SET name={PH}, date={PH}, startTime={PH}, endTime={PH}, "
+        f"category={PH}, people={PH}, reminder={PH} WHERE id={PH}",
+        (event.name, event.date, event.startTime, event.endTime,
+         event.category, json.dumps(event.people), event.reminder, event_id),
     )
     conn.commit()
-    if result.rowcount == 0:
+    if cur.rowcount == 0:
         conn.close()
         raise HTTPException(status_code=404, detail="Event not found")
-    row = conn.execute("SELECT * FROM events WHERE id = ?", (event_id,)).fetchone()
+    cur.execute(f"SELECT * FROM events WHERE id = {PH}", (event_id,))
+    row = cur.fetchone()
     conn.close()
     return row_to_event(row)
 
@@ -134,10 +144,12 @@ def update_event(event_id: int, event: EventIn):
 @app.delete("/events/{event_id}", status_code=204)
 def delete_event(event_id: int):
     conn = get_db()
-    result = conn.execute("DELETE FROM events WHERE id = ?", (event_id,))
+    cur = conn.cursor()
+    cur.execute(f"DELETE FROM events WHERE id = {PH}", (event_id,))
     conn.commit()
+    rowcount = cur.rowcount
     conn.close()
-    if result.rowcount == 0:
+    if rowcount == 0:
         raise HTTPException(status_code=404, detail="Event not found")
 
 
@@ -151,10 +163,12 @@ async def get_summary():
     window_end = today + timedelta(days=14)
 
     conn = get_db()
-    rows = conn.execute(
-        "SELECT * FROM events WHERE date >= ? AND date <= ? ORDER BY date, startTime",
+    cur = conn.cursor()
+    cur.execute(
+        f"SELECT * FROM events WHERE date >= {PH} AND date <= {PH} ORDER BY date, startTime",
         (today.isoformat(), window_end.isoformat()),
-    ).fetchall()
+    )
+    rows = cur.fetchall()
     conn.close()
 
     if not rows:
