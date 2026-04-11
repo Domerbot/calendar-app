@@ -79,6 +79,11 @@ class Event(EventIn):
 def row_to_event(row) -> dict:
     d = dict(row)
     d["people"] = json.loads(d["people"])
+    # PostgreSQL lowercases column names; restore camelCase
+    if "starttime" in d:
+        d["startTime"] = d.pop("starttime")
+    if "endtime" in d:
+        d["endTime"] = d.pop("endtime")
     return d
 
 
